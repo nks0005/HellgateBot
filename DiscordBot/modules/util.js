@@ -75,6 +75,17 @@ class Util {
         }
     }
 
+    static findIndexKr(Index) {
+        for (const item of jsonItems) {
+            if (Index == item['Index']) {
+                let ret = item['LocalizedNames']['KO-KR'];
+                ret = ret.replace('장로의 ', '');
+
+                return ret;
+            }
+        }
+    }
+
     static findItemIndex(itemName) {
         itemName = 'T8_' + itemName;
 
@@ -87,6 +98,15 @@ class Util {
         }
     }
 
+    static compareParty(partyA, userName) {
+        let Check = false;
+        for (const party of partyA) {
+            if (party.Name == userName) {
+                Check = true;
+            }
+        }
+        return Check;
+    }
 
     static Type2Index(Type) {
         if (Type == null) return Type;

@@ -1,6 +1,7 @@
 const { Client, GatewayIntentBits } = require('discord.js');
 const { token, wanthealcomeId } = require('./config/discord_config.json');
 const { Channel, sequelize } = require('./models/index.js');
+const Monitor = require('./modules/monitor.js').modules;
 
 sequelize.sync({ force: false }).then(() => {
         console.log('데이터베이스 연결 성공');
@@ -13,6 +14,11 @@ const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
 client.once('ready', () => {
     console.log('Ready!');
+
+
+
+    m = new Monitor(20000, client);
+    m.update();
 });
 
 
