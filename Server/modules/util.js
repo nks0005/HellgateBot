@@ -1,3 +1,5 @@
+const jsonItems = require('./items.json');
+
 const TYPE = {
     C_5: 18,
     C_20: 20,
@@ -45,6 +47,56 @@ class Util {
     static equip2Type(Equip) {
         if (Equip == null) return Equip;
         return Equip['Type'];
+    }
+
+    static filterMainHand(mainHand) {
+        let filterMainHand = ``;
+        let start = mainHand.indexOf('_') + 1;
+        let end = mainHand.lastIndexOf('@');
+
+        if (end == -1)
+            filterMainHand = mainHand.substring(start);
+        else
+            filterMainHand = mainHand.substring(start, end);
+
+        return filterMainHand;
+    }
+
+    static findItemKr(itemName) {
+        itemName = 'T8_' + itemName;
+
+        for (const item of jsonItems) {
+            if (itemName == item['UniqueName']) {
+                let ret = item['LocalizedNames']['KO-KR'];
+                ret = ret.replace('장로의 ', '');
+
+                return ret;
+            }
+        }
+    }
+
+    static findItemIndex(itemName) {
+        itemName = 'T8_' + itemName;
+
+        for (const item of jsonItems) {
+            if (itemName == item['UniqueName']) {
+                let ret = item['Index'];
+
+                return ret;
+            }
+        }
+    }
+
+
+    static Type2Index(Type) {
+        if (Type == null) return Type;
+
+        Type = Type['Type'];
+
+        const MainHand = this.filterMainHand(`${Type}`);
+        const m_Index = parseInt(this.findItemIndex(`${MainHand}`));
+
+        return m_Index;
     }
 
     static async sleep(ms) {

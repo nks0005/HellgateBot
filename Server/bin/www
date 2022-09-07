@@ -33,7 +33,7 @@ server.on('listening', onListening);
 /**
  * Loop Crawling data
  */
-cr = new crawling(3, 5000);
+cr = new crawling(10, 20000);
 cr.updateLoop();
 
 /**

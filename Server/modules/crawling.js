@@ -81,7 +81,9 @@ class crawling {
                          * 3. 킬수는 파티 맴버의 이상이여야 함
                          */
                         {
-                            let checkOverIp, party, healer = 0;
+                            let checkOverIp = 0,
+                                party = 0,
+                                healer = 0;
                             //console.log(`PartyMemberCount : ${PartyMemberCount}, totalPlayers : ${totalPlayers}, totalKills : ${totalKills}`);
 
                             if (PartyMemberCount == 2 && (totalPlayers == 3 || totalPlayers == 4) && (totalKills >= 2 && totalKills < 4)) {
@@ -89,8 +91,10 @@ class crawling {
                                     const { SupportHealingDone, AverageItemPower } = support;
 
                                     //if (SupportHealingDone > 0) healer++;
-                                    if (AverageItemPower != 0 && (AverageItemPower < 900 || AverageItemPower > 1300)) checkOverIp++;
+                                    if (AverageItemPower != 0)
+                                        if (AverageItemPower < 900 || AverageItemPower > 1300) checkOverIp++;
                                 }
+                                // console.log('2', checkOverIp, healer, id);
 
                                 if (!checkOverIp) retType |= 1;
 
@@ -99,18 +103,23 @@ class crawling {
                                     const { SupportHealingDone, AverageItemPower } = support;
 
                                     if (SupportHealingDone > 0) healer++;
-                                    if (AverageItemPower != 0 && (AverageItemPower < 1000 || AverageItemPower > 1450)) checkOverIp++;
-                                }
+                                    if (AverageItemPower != 0)
+                                        if (AverageItemPower < 1000 || AverageItemPower > 1450) checkOverIp++;
 
-                                if (!checkOverIp && healer) retType |= 2;
+                                }
+                                //console.log('5', checkOverIp, healer, id);
+
+                                if (!checkOverIp && healer >= 2) retType |= 2;
 
                             } else if (PartyMemberCount == 10 && (totalPlayers == 19 || totalPlayers == 20) && (totalKills >= 10 && totalKills < 20)) {
                                 for (const support of Participants) {
                                     const { SupportHealingDone, AverageItemPower } = support;
 
                                     if (SupportHealingDone > 0) healer++;
-                                    if (AverageItemPower != 0 && (AverageItemPower < 1000 || AverageItemPower > 1450)) checkOverIp++;
+                                    if (AverageItemPower != 0)
+                                        if (AverageItemPower < 1000 || AverageItemPower > 1450) checkOverIp++;
                                 }
+                                //console.log('10', checkOverIp, healer >= 2, id);
 
                                 if (!checkOverIp && healer) retType |= 4;
                             }
@@ -134,8 +143,8 @@ class crawling {
     async updateLoop() {
         console.log(`등록 완료 : ${this.loopCount}, ${this.timeCycle}`);
         while (true) {
-            this.update();
             await Util.sleep(this.timeCycle);
+            this.update();
         }
     }
 
@@ -145,36 +154,37 @@ class crawling {
             //console.log(`i : ${i}`);
             (async(index) => {
                 try {
-                    //console.log(`https://gameinfo.albiononline.com/api/gameinfo/battles?offset=${index==0?0:index*50}&limit=50&sort=recent`);
                     let result = await axios.get(`https://gameinfo.albiononline.com/api/gameinfo/battles?offset=${index==0?0:index*50}&limit=50&sort=recent`);
                     if (result.status == 200 && result.data != null) {
                         for (const battlelog of result.data) {
-                            const { id } = battlelog;
+                            const { id, startTime, totalKills, players } = battlelog;
+                            const totalPlayers = Util.array2count(players);
+
                             switch (await this.checkBattleType(battlelog)) {
 
                                 case Util.getType().C_5: // 크리스탈 5v5
                                     //console.log(`[c5] https://albionbattles.com/battles/${battlelog['id']}`);
-                                    await axios.post(Util.getURL().HOME + Util.getURL().CRYSTAL + Util.getURL().FIVE, { battleId: id })
+                                    await axios.post(Util.getURL().HOME + Util.getURL().CRYSTAL + Util.getURL().FIVE, { battleId: id, logTime: startTime, totalPlayers: totalPlayers, totalKills: totalKills, crystal: 1, type: 1 })
                                     break;
 
                                 case Util.getType().C_20: // 크리스탈 20v20
                                     //console.log(`[c20] https://albionbattles.com/battles/${battlelog['id']}`);
-                                    await axios.post(Util.getURL().HOME + Util.getURL().CRYSTAL + Util.getURL().TWENTY, { battleId: id })
+                                    await axios.post(Util.getURL().HOME + Util.getURL().CRYSTAL + Util.getURL().TWENTY, { battleId: id, logTime: startTime, totalPlayers: totalPlayers, totalKills: totalKills, crystal: 1, type: 3 })
                                     break;
 
                                 case Util.getType().H_2: // 헬게이트 2v2
                                     //console.log(`[h2] https://albionbattles.com/battles/${battlelog['id']}`);
-                                    await axios.post(Util.getURL().HOME + Util.getURL().HELLGATE + Util.getURL().DOUBLE, { battleId: id })
+                                    await axios.post(Util.getURL().HOME + Util.getURL().HELLGATE + Util.getURL().DOUBLE, { battleId: id, logTime: startTime, totalPlayers: totalPlayers, totalKills: totalKills, crystal: 0, type: 0 })
                                     break;
 
                                 case Util.getType().H_5: // 헬게이트 5v5
                                     //console.log(`[h5] https://albionbattles.com/battles/${battlelog['id']}`);
-                                    await axios.post(Util.getURL().HOME + Util.getURL().HELLGATE + Util.getURL().FIVE, { battleId: id })
+                                    await axios.post(Util.getURL().HOME + Util.getURL().HELLGATE + Util.getURL().FIVE, { battleId: id, logTime: startTime, totalPlayers: totalPlayers, totalKills: totalKills, crystal: 0, type: 1 })
                                     break;
 
                                 case Util.getType().H_10: // 헬게이트 10v10
                                     //console.log(`[h10] https://albionbattles.com/battles/${battlelog['id']}`);
-                                    await axios.post(Util.getURL().HOME + Util.getURL().HELLGATE + Util.getURL().TEN, { battleId: id })
+                                    await axios.post(Util.getURL().HOME + Util.getURL().HELLGATE + Util.getURL().TEN, { battleId: id, logTime: startTime, totalPlayers: totalPlayers, totalKills: totalKills, crystal: 0, type: 2 })
                                     break;
 
                                 default:

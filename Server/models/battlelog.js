@@ -27,11 +27,13 @@ module.exports = class BattleLog extends Sequelize.Model {
             send: {
                 type: Sequelize.BOOLEAN,
                 allowNull: false,
+                defaultValue: false
             },
 
             checkTotal: {
                 type: Sequelize.BOOLEAN,
                 allowNull: false,
+                defaultValue: false
             },
 
             crystal: {
