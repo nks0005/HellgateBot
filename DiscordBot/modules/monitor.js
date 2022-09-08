@@ -2,6 +2,7 @@ const axios = require('axios');
 const { Channel, sequelize } = require('../models/index.js');
 const Util = require('./util.js').modules;
 const { EmbedBuilder } = require("discord.js");
+const { off } = require('../../Server/app.js');
 
 /**
  * 서버로 부터 데이터를 받아서
@@ -153,23 +154,59 @@ class Monitor {
         }
 
 
-        console.log(`
-        battleId : ${battleId}
-        ===============
-        Party A
+        return { partyA: finalPartyA, partyB: finalPartyB };
+    }
 
-        size : ${finalPartyA.size}
-        ${[...finalPartyA].join('\n')}
-        
-        ---------------
-        Party B
 
-        size : ${finalPartyB.size}
-        ${[...finalPartyB].join('\n')}
+    processMember(member) {
+        let { userName, mainHand, offHand, head, armor, shoes, cape } = this.processSplitString(member);
 
-        
-        ===============
-    `);
+        mainHand = Util.findIndexKr(mainHand).replace(' ', '');
+        offHand = Util.findIndexKr(offHand).replace(' ', '');
+        head = Util.findIndexKr(head).replace(' ', '');
+        armor = Util.findIndexKr(armor).replace(' ', '');
+        shoes = Util.findIndexKr(shoes).replace(' ', '');
+        cape = Util.findIndexKr(cape).replace(' ', '').replace('망토', '');
+
+        return { userName, mainHand, offHand, head, armor, shoes, cape };
+    }
+
+    /**
+     * 합쳐진 문자열을 분해하고, 각 인덱스에 맞춰 배열한다.
+     * 
+     * @param {string} mixedName 
+     */
+    processSplitString(mixedName) {
+        let userName, mainHand, offHand = '', head, armor, shoes, cape;
+
+
+        const splited = mixedName.split('_');
+
+        // 보조 무기가 없을 경우
+        if (splited.length == 6) {
+            userName = splited[0];
+            mainHand = splited[1];
+            head = splited[2];
+            armor = splited[3];
+            shoes = splited[4];
+            cape = splited[5];
+        }
+        else if (splited.length == 7) {
+            userName = splited[0];
+            mainHand = splited[1];
+            offHand = splited[2];
+            head = splited[3];
+            armor = splited[4];
+            shoes = splited[5];
+            cape = splited[6];
+        }
+        else {
+            console.log(`이상한 값 : ${mixedName}`);
+            return null;
+        }
+
+
+        return { userName, mainHand, offHand, head, armor, shoes, cape };
     }
 
     async processUpload(data) {
@@ -182,7 +219,7 @@ class Monitor {
                 // date += (18 * 60 * 60 * 1000);
 
                 let match = '';
-                if (crystal == 0) {
+                if (crystal == 1) {
                     if (type == 1) {
                         match = "5v5 crystal";
                     } else if (type == 3) {
@@ -202,7 +239,29 @@ class Monitor {
                     .setTimestamp(date)
                     .setFooter({ text: '한국 시간 : ' });
 
-                this.whoIsWin(EventLogs);
+                const { partyA, partyB } = this.whoIsWin(EventLogs);
+                let arrMsgPartyA = ``;
+                let arrMsgPartyB = ``;
+
+                // A팀 부터 작업
+                for (const member of partyA) {
+                    const { userName, mainHand, offHand, head, armor, shoes, cape } = this.processMember(member);
+
+                    //console.log(userName, mainHand, offHand, head, armor, shoes, cape);
+                    arrMsgPartyA += `이름 : ${userName}\n${mainHand}${(offHand == '' ? '' : ` ${offHand}`)} ${head} ${armor} ${shoes} ${cape}\n\n`;
+                }
+                hellgateEmbed.addFields({ name: `🗡️Winner Team`, value: arrMsgPartyA });
+
+                // B팀 작업
+                for (const member of partyB) {
+                    const { userName, mainHand, offHand, head, armor, shoes, cape } = this.processMember(member);
+
+                    //console.log(userName, mainHand, offHand, head, armor, shoes, cape);
+                    arrMsgPartyB += `이름 : ${userName}\n${mainHand}${(offHand == '' ? '' : ` ${offHand}`)} ${head} ${armor} ${shoes} ${cape}\n\n`;
+                }
+                hellgateEmbed.addFields({ name: `☠️Loser Team`, value: arrMsgPartyB });
+
+                /*
 
                 for (const eventlog of EventLogs) {
                     const { PlayerLogs } = eventlog;
@@ -237,6 +296,7 @@ class Monitor {
                         hellgateEmbed.addFields({ name: `🗡️${arrMsg[0]}`, value: `${arrMsg[1]}` });
 
                 }
+                */
 
 
                 // 데이터베이스에서 목적지를 찾는다.
@@ -250,7 +310,7 @@ class Monitor {
                 for (const ch of channelData) {
                     const { guildId, channelId } = ch;
 
-                    //this.client.guilds.cache.get(guildId).channels.cache.get(channelId).send({ embeds: [hellgateEmbed] });
+                    this.client.guilds.cache.get(guildId).channels.cache.get(channelId).send({ embeds: [hellgateEmbed] });
                 }
             }
         } catch (err) {

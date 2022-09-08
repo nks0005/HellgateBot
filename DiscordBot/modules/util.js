@@ -30,7 +30,7 @@ const m_URL = {
 const killType = { Killer: 0, Victim: 1, Support: 2 };
 
 class Util {
-    constructor() {}
+    constructor() { }
 
     static getType() { return TYPE; }
     static getKillType() { return killType; }
@@ -76,6 +76,8 @@ class Util {
     }
 
     static findIndexKr(Index) {
+        if (Index == null) return '';
+
         for (const item of jsonItems) {
             if (Index == item['Index']) {
                 let ret = item['LocalizedNames']['KO-KR'];
@@ -84,6 +86,8 @@ class Util {
                 return ret;
             }
         }
+
+        return '';
     }
 
     static findItemIndex(itemName) {
