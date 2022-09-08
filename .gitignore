@@ -1,2 +1,4 @@
 /Server/config
 /DiscordBot/config
+/Server/node_modules
+/DiscordBot/node_modules
