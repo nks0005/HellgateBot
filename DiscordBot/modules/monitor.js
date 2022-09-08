@@ -21,6 +21,8 @@ class Monitor {
         return ret;
     }
 
+    
+
     async processUpload(data) {
         try {
             if (data.status == 201 && data.data != null) {
