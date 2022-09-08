@@ -54,6 +54,8 @@ class Monitor {
                 for (const eventlog of EventLogs) {
                     const { PlayerLogs } = eventlog;
 
+                    
+
                     let checkZeroIp = false;
                     //let offsetSupport = 2;
                     let arrMsg = [];
