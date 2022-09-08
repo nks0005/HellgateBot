@@ -310,6 +310,7 @@ class Monitor {
                 for (const ch of channelData) {
                     const { guildId, channelId } = ch;
 
+                    console.log(`${match} 전송 완료 `);
                     this.client.guilds.cache.get(guildId).channels.cache.get(channelId).send({ embeds: [hellgateEmbed] });
                 }
             }
