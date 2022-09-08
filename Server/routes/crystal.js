@@ -23,7 +23,7 @@ router.get('/TWENTY', async function(req, res, next) {
 
 router.post('/FIVE', isDatabaseIn, async function(req, res, next) {
     req.crystal = 1;
-    req.type = 2;
+    req.type = 1;
     res.render('index', { title: req.id });
     updateDatabaseKillboard(req, res, next);
 });

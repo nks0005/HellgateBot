@@ -1,14 +1,15 @@
 var test = new Set();
 
 
-test.add('wanthealcome');
-test.add('rksk');
-test.add('wanthealcome');
-test.add('santaboy');
-test.add('hello');
-test.add('wanthealcome');
+
+test.add('wanthealcome_123454');
+test.add('wanthealcome_121244');
+
+test.add('wanthealcome_123454');
+test.add('wanthealcome_121244');
+
 
 console.log(test.size);
-console.log(`test.has('wanthealcome') : ${test.has('wanthealcome')}`);
+
 
 console.log(test);

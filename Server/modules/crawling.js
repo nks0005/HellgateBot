@@ -208,7 +208,7 @@ class crawling {
                         }
                     }
                 } catch (err) {
-                    console.error(err);
+                    //console.error(err);
                 }
             })(i);
         }
