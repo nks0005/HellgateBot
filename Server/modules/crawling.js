@@ -11,6 +11,12 @@ class crawling {
         this.timeCycle = timeCycle; // 몇 ms 주기로 긁는지
     }
 
+    checkIp(target, min, max) {
+        if (target != 0)
+            if (target < min || target > max) return true;
+        return false;
+    }
+
     /**
      * 전투 기록을 받아서 크리스탈 리그, 헬게이트, 2v2, 5v5, 10v10, 20v20 구분
      *
@@ -50,6 +56,8 @@ class crawling {
             if (result.status == 200 && result.data != null) {
                 for (const eventlog of result.data) {
                     const { KillArea, GroupMembers, Participants } = eventlog;
+
+
                     const PartyMemberCount = Util.array2count(GroupMembers);
 
                     // 크리스탈 여부 확인
@@ -62,7 +70,7 @@ class crawling {
                          * 크리스탈의 경우 인원수
                          */
                         if (PartyMemberCount == 5) retType |= 2;
-                        else if (PartyMemberCount >= 15 && PartyMemberCount <= 20) retType != 8;
+                        else retType != 8;
 
 
                     } else if (KillArea == `OPEN_WORLD`) {
@@ -81,6 +89,9 @@ class crawling {
                          * 3. 킬수는 파티 맴버의 이상이여야 함
                          */
                         {
+                            const Killer_Ip = eventlog['Killer']['AverageItemPower'];
+                            const Victim_Ip = eventlog['Victim']['AverageItemPower'];
+
                             let checkOverIp = 0,
                                 party = 0,
                                 healer = 0;
@@ -91,8 +102,10 @@ class crawling {
                                     const { SupportHealingDone, AverageItemPower } = support;
 
                                     //if (SupportHealingDone > 0) healer++;
-                                    if (AverageItemPower != 0)
-                                        if (AverageItemPower < 900 || AverageItemPower > 1300) checkOverIp++;
+                                    if (this.checkIp(AverageItemPower, 900, 1300)) checkOverIp++;
+                                    if (this.checkIp(Killer_Ip, 900, 1300)) checkOverIp++;
+                                    if (this.checkIp(Victim_Ip, 900, 1300)) checkOverIp++
+
                                 }
                                 // console.log('2', checkOverIp, healer, id);
 
@@ -103,21 +116,23 @@ class crawling {
                                     const { SupportHealingDone, AverageItemPower } = support;
 
                                     if (SupportHealingDone > 0) healer++;
-                                    if (AverageItemPower != 0)
-                                        if (AverageItemPower < 1000 || AverageItemPower > 1450) checkOverIp++;
+                                    if (this.checkIp(AverageItemPower, 1000, 1450)) checkOverIp++;
+                                    if (this.checkIp(Killer_Ip, 1000, 1450)) checkOverIp++;
+                                    if (this.checkIp(Victim_Ip, 1000, 1450)) checkOverIp++
 
                                 }
                                 //console.log('5', checkOverIp, healer, id);
 
-                                if (!checkOverIp && healer >= 2) retType |= 2;
+                                if (!checkOverIp && healer) retType |= 2;
 
                             } else if (PartyMemberCount == 10 && (totalPlayers == 19 || totalPlayers == 20) && (totalKills >= 10 && totalKills < 20)) {
                                 for (const support of Participants) {
                                     const { SupportHealingDone, AverageItemPower } = support;
 
                                     if (SupportHealingDone > 0) healer++;
-                                    if (AverageItemPower != 0)
-                                        if (AverageItemPower < 1000 || AverageItemPower > 1450) checkOverIp++;
+                                    if (this.checkIp(AverageItemPower, 1000, 1450)) checkOverIp++;
+                                    if (this.checkIp(Killer_Ip, 1000, 1450)) checkOverIp++;
+                                    if (this.checkIp(Victim_Ip, 1000, 1450)) checkOverIp++
                                 }
                                 //console.log('10', checkOverIp, healer >= 2, id);
 

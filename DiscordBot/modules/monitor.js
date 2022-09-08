@@ -28,12 +28,26 @@ class Monitor {
                 let hellgateEmbed = new EmbedBuilder();
 
                 var date = new Date(logTime).getTime();
-                date += (18 * 60 * 60 * 1000);
+                // date += (18 * 60 * 60 * 1000);
+
+                let match = '';
+                if (crystal == 0) {
+                    if (type == 1) {
+                        match = "5v5 crystal";
+                    } else if (type == 3) {
+                        match = "20v20 crystal";
+                    }
+                } else {
+                    if (type == 0) match = "2v2 hellgate";
+                    else if (type == 1) match = "5v5 hellgate";
+                    else if (type == 2) match = "10v10 hellgate";
+                }
+
 
                 hellgateEmbed.setColor('#0099ff')
                     .setTitle(`https://albionbattles.com/battles/${battleId}`)
                     .setURL(`https://albionbattles.com/battles/${battleId}`)
-                    .setAuthor({ name: 'Find! 5v5 hellgate killboard', url: `https://albionbattles.com/battles/${battleId}` })
+                    .setAuthor({ name: `Find! ${match} killboard`, url: `https://albionbattles.com/battles/${battleId}` })
                     .setTimestamp(date)
                     .setFooter({ text: '한국 시간 : ' });
 

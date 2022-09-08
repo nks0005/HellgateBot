@@ -17,8 +17,8 @@ client.once('ready', () => {
 
 
 
-    m = new Monitor(20000, client);
-    m.update();
+    m = new Monitor(5000, client);
+    m.updateCycle();
 });
 
 

@@ -6,7 +6,7 @@ const { isDatabaseIn, updateDatabaseKillboard, downloadKillboard } = require('./
 
 router.get('/FIVE', async function(req, res, next) {
     req.crystal = 1;
-    req.type = 2;
+    req.type = 1;
 
     downloadKillboard(req, res, next);
 });
