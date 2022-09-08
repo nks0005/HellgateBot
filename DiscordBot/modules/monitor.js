@@ -21,7 +21,156 @@ class Monitor {
         return ret;
     }
 
-    
+    /**
+     * 이벤트 로그를 통해 승리팀과 패배팀을 반환해준다.
+     * 
+     * ## 승리, 패배팀 구별 알고리즘
+        1. init. 첫번째 Victim은 B팀. Killer와 Support는 A팀으로 정한다
+        2. loop.
+            1. 다음 Victim을 B팀인지 A팀인지 비교한다.
+                1. A팀에 있다면 Killer와 Support를 B팀으로 정한다.
+                2. B팀에 있다면 Killer와 Support를 A팀으로 정한다.
+                3. 두 팀다 없다면 ( 간혹 안정해져 있을 때가 있음 )
+                    1. Killer을 B팀인지 A팀인지 비교한다.
+                        1. A팀이라면 Victim을 B팀으로, Support를 A팀으로 정한다.
+                     2. B팀이라면 Victim을 A팀으로, Support를 B팀으로 정한다.
+                        3. 두 팀다 없다면
+                         1. Support들을 비교한다.
+                            1. 한명이라도 A팀이라면 Killer와 Support를 A팀. Victim을 B팀으로
+     * 
+     * @param {json} eventlog 
+     * @return {{partyA, partyB}} 
+     */
+    whoIsWin(EventLogs) {
+        // Set 클래스를 이용하여 중복 닉네임이 들어가지 않도록 한다.
+        // 닉네임_헬멧_무기_갑옷_신발
+        let partyA = new Set();
+        let partyB = new Set();
+
+        let battleId = EventLogs[0]['battleId'];
+
+        for (const eventlog of EventLogs) {
+            let skipIp = false;
+            const { memberCount, PlayerLogs } = eventlog;
+
+            let victim = new Set();
+            let killers = new Set();
+
+            for (const playerlog of PlayerLogs) {
+                const { userName, killType, avgIp, mainHand, offHand, head, armor, shoes, cape } = playerlog;
+
+                if (avgIp == 0) {
+                    continue;
+                }
+                const weapon = offHand != null ? `${mainHand}_${offHand}` : `${mainHand}`
+
+                const mixedName = `${userName}_${weapon}_${head}_${armor}_${shoes}_${cape}`;
+                // Victim
+                if (killType == 1) {
+                    victim.add(mixedName);
+                } else {
+                    killers.add(mixedName);
+                }
+            }
+
+            let arrVictim = [...victim];
+            let arrKiller = [...killers];
+
+            // init.
+            if (partyA.size == 0 && partyB.size == 0) {
+                partyB.add(arrVictim[0]);
+                for (const killer of arrKiller) {
+                    partyA.add(killer);
+                }
+            }
+
+            else {
+                // Victim이 누구 팀인가?
+                if (partyA.has(arrVictim[0])) {
+                    // A팀 일 경우
+
+                    // B팀에 킬러들을 넣으면 된다
+                    for (const killer of arrKiller) {
+                        partyB.add(killer);
+                    }
+                }
+                else if (partyB.has(arrVictim[0])) {
+                    // B팀 일 경우
+
+                    // A팀에 킬러들을 넣으면 된다
+                    for (const killer of arrKiller) {
+                        partyA.add(killer);
+                    }
+                }
+                else {
+                    // A팀도, B팀도 아닐 경우
+
+                    // killer 들을 비교한다
+                    let isPartyA = false;
+                    let isPartyB = false;
+                    for (const killer of arrKiller) {
+                        if (partyA.has(killer)) {
+                            isPartyA = true;
+                        }
+                        if (partyB.has(killer)) {
+                            isPartyB = true;
+                        }
+                    }
+
+                    if ((isPartyA == false && isPartyB == false) || (isPartyA == true && isPartyB == true)) {
+                        // 두 파티에 있거나 없을 경우 버그. 스킵한다.
+                        continue;
+                    }
+                    else if (isPartyA) {
+                        // 킬러가 A팀이라면 죽은자는 B팀
+                        partyB.add(arrVictim[0]);
+
+                        for (const killer of arrKiller) {
+                            partyA.add(killer);
+                        }
+
+                    } else if (isPartyB) {
+                        // 킬러가 B팀이라면 죽은자는 A팀
+                        partyA.add(arrVictim[0]);
+
+                        for (const killer of arrKiller) {
+                            partyB.add(killer);
+                        }
+                    }
+                }
+            }
+        }
+
+        let finalPartyA = new Set();
+        let finalPartyB = new Set();
+
+        for (const member of partyA) {
+            if (member != null) finalPartyA.add(member);
+        }
+
+        for (const member of partyB) {
+            if (member != null) finalPartyB.add(member);
+        }
+
+
+        console.log(`
+        battleId : ${battleId}
+        ===============
+        Party A
+
+        size : ${finalPartyA.size}
+        ${[...finalPartyA].join('\n')}
+        
+        ---------------
+        Party B
+
+        size : ${finalPartyB.size}
+        ${[...finalPartyB].join('\n')}
+
+        
+        ===============
+    `);
+    }
 
     async processUpload(data) {
         try {
@@ -53,10 +202,12 @@ class Monitor {
                     .setTimestamp(date)
                     .setFooter({ text: '한국 시간 : ' });
 
+                this.whoIsWin(EventLogs);
+
                 for (const eventlog of EventLogs) {
                     const { PlayerLogs } = eventlog;
 
-                    
+
 
                     let checkZeroIp = false;
                     //let offsetSupport = 2;
@@ -99,7 +250,7 @@ class Monitor {
                 for (const ch of channelData) {
                     const { guildId, channelId } = ch;
 
-                    this.client.guilds.cache.get(guildId).channels.cache.get(channelId).send({ embeds: [hellgateEmbed] });
+                    //this.client.guilds.cache.get(guildId).channels.cache.get(channelId).send({ embeds: [hellgateEmbed] });
                 }
             }
         } catch (err) {
