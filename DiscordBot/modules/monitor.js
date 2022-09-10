@@ -80,7 +80,8 @@ class Monitor {
             if (partyA.size == 0 && partyB.size == 0) {
                 partyB.add(arrVictim[0]);
                 for (const killer of arrKiller) {
-                    partyA.add(killer);
+                    if (!partyB.has(killer))
+                        partyA.add(killer);
                 }
             }
 
@@ -91,7 +92,8 @@ class Monitor {
 
                     // B팀에 킬러들을 넣으면 된다
                     for (const killer of arrKiller) {
-                        partyB.add(killer);
+                        if (!partyA.has(killer))
+                            partyB.add(killer);
                     }
                 }
                 else if (partyB.has(arrVictim[0])) {
@@ -99,7 +101,8 @@ class Monitor {
 
                     // A팀에 킬러들을 넣으면 된다
                     for (const killer of arrKiller) {
-                        partyA.add(killer);
+                        if (!partyB.has(killer))
+                            partyA.add(killer);
                     }
                 }
                 else {
@@ -126,7 +129,8 @@ class Monitor {
                         partyB.add(arrVictim[0]);
 
                         for (const killer of arrKiller) {
-                            partyA.add(killer);
+                            if (!partyB.has(killer))
+                                partyA.add(killer);
                         }
 
                     } else if (isPartyB) {
@@ -134,7 +138,8 @@ class Monitor {
                         partyA.add(arrVictim[0]);
 
                         for (const killer of arrKiller) {
-                            partyB.add(killer);
+                            if (!partyA.has(killer))
+                                partyB.add(killer);
                         }
                     }
                 }
