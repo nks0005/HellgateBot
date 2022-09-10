@@ -386,7 +386,8 @@ class Monitor {
 
                     console.log(`${match} 전송 완료 `);
                     this.client.guilds.cache.get(guildId).channels.cache.get(channelId).send({ embeds: [hellgateEmbed] });
-                    this.client.guilds.cache.get(guildId).channels.cache.get(channelId).send(alarmMsg);
+                    if (alarmMsg.length > 0)
+                        this.client.guilds.cache.get(guildId).channels.cache.get(channelId).send(alarmMsg);
                 }
             }
         } catch (err) {
