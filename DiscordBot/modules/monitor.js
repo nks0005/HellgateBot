@@ -371,7 +371,7 @@ class Monitor {
 
 
                 // 알람 필터링
-                alarmMsg = this.processAlarm(partyA, partyB);
+                let alarmMsg = this.processAlarm(partyA, partyB);
 
                 // 데이터베이스에서 목적지를 찾는다.
                 const channelData = await Channel.findAll({
