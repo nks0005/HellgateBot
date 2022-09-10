@@ -273,7 +273,7 @@ class Monitor {
             return false;
         }
 
-        const checkGaudian = (head) => {
+        const checkGaudian = (shoes) => {
             if (shoes.includes('가디언헬멧'))
                 return true;
             return false;
