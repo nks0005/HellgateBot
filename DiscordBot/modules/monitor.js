@@ -232,10 +232,18 @@ class Monitor {
      * @param {party} partyB 
      */
     processAlarm(partyA, partyB) {
-        let flag_1, flag_2, flag_3_1, flag_3_2, flag_4, flag_5_1, flag_5_2, flag_6, flag_7, flag_8, flag_9 = false;
+        let flag_1 = false,
+            flag_2 = false,
+            flag_3_1 = false,
+            flag_3_2 = false,
+            flag_4 = false,
+            flag_5_1 = false
+            , flag_5_2 = false
+            , flag_6 = false, flag_7 = false, flag_8 = false, flag_9 = false;
 
         const checkIp = (avgIp) => {
-            if (avgIp > 1310) return true;
+            if (avgIp > 1310)
+                return true;
             return false;
         };
 
@@ -273,8 +281,8 @@ class Monitor {
             return false;
         }
 
-        const checkGaudian = (shoes) => {
-            if (shoes.includes('가디언헬멧'))
+        const checkGaudian = (head) => {
+            if (head.includes('가디언헬멧'))
                 return true;
             return false;
         }
@@ -282,41 +290,44 @@ class Monitor {
         for (const member of partyA) {
             const { userName, mainHand, offHand, head, armor, shoes, cape, avgIp } = this.processMember(member);
 
-            //console.log(mainHand, head, shoes, avgIp);
+            if (checkIp(avgIp)) flag_1 = true;
+            if (checkDejayun(mainHand)) flag_2 = true;
 
-            flag_1 = checkIp(avgIp);
-            flag_2 = checkDejayun(mainHand);
-            flag_3_1 = checkTodan_1(mainHand);
-            flag_3_2 = checkTodan_2(mainHand);
-            flag_4 = checkOskiper(mainHand);
-            flag_5_1 = checkDiver_1(mainHand);
-            flag_5_2 = checkDiver_2(shoes);
-            flag_6 = checkGaudian(head);
+            if (checkTodan_1(mainHand)) flag_3_1 = true;
+            if (checkTodan_2(mainHand)) flag_3_2 = true;
 
+            if (checkOskiper(mainHand)) flag_4 = true;
+
+            if (checkDiver_1(mainHand)) flag_5_1 = true;
+            if (checkDiver_2(shoes)) flag_5_2 = true;
+
+            if (checkGaudian(head)) flag_6 = true;
         }
 
         for (const member of partyB) {
             const { userName, mainHand, offHand, head, armor, shoes, cape, avgIp } = this.processMember(member);
 
-            //console.log(mainHand, head, shoes, avgIp);
+            if (checkIp(avgIp)) flag_1 = true;
+            if (checkDejayun(mainHand)) flag_2 = true;
 
-            flag_1 = checkIp(avgIp);
-            flag_2 = checkDejayun(mainHand);
-            flag_3_1 = checkTodan_1(mainHand);
-            flag_3_2 = checkTodan_2(mainHand);
-            flag_4 = checkOskiper(mainHand);
-            flag_5_1 = checkDiver_1(mainHand);
-            flag_5_2 = checkDiver_2(shoes);
-            flag_6 = checkGaudian(head);
+            if (checkTodan_1(mainHand)) flag_3_1 = true;
+            if (checkTodan_2(mainHand)) flag_3_2 = true;
+
+            if (checkOskiper(mainHand)) flag_4 = true;
+
+            if (checkDiver_1(mainHand)) flag_5_1 = true;
+            if (checkDiver_2(shoes)) flag_5_2 = true;
+
+            if (checkGaudian(head)) flag_6 = true;
         }
 
         let alarmMsg = ``;
-        if (flag_1) alarmMsg += `높은 IP 유저가 있습니다.<@&995137308732960778>`;
-        if (flag_2) alarmMsg += `대자연 유저가 있습니다.<@&995632668974788659>`;
-        if (flag_3_1 && flag_3_2) alarmMsg += `토단 유저가 있습니다.<@&995632741108432896>`;
-        if (flag_4) alarmMsg += `오스키퍼 유저가 있습니다.<@&995635540613398538>`;
-        if (flag_5_1 && flag_5_2) alarmMsg += `심판관 다이브가 있습니다.<@&1017763696145084426>`;
-        if (flag_6) alarmMsg += `가디언 헬멧 유저가 있습니다.<@&1017763872108728341>`
+        if (flag_1) alarmMsg += `높은 IP 유저가 있습니다.<@&995137308732960778>\n`;
+        if (flag_2) alarmMsg += `대자연 유저가 있습니다.<@&995632668974788659>\n`;
+        if (flag_3_1 && flag_3_2) alarmMsg += `토단 유저가 있습니다.<@&995632741108432896>\n`;
+        if (flag_4) alarmMsg += `오스키퍼 유저가 있습니다.<@&995635540613398538>\n`;
+        if (flag_5_1 && flag_5_2) alarmMsg += `심판관 다이브가 있습니다.<@&1017763696145084426>\n`;
+        if (flag_6) alarmMsg += `가디언 헬멧 유저가 있습니다.<@&1017763872108728341>\n`
 
         console.log(flag_1, flag_2, flag_3_1, flag_3_2, flag_4, flag_5_1, flag_5_2, flag_6)
 
@@ -391,10 +402,10 @@ class Monitor {
                     const { guildId, channelId } = ch;
 
                     console.log(`${match} 전송 완료 `);
-                    this.client.guilds.cache.get(guildId).channels.cache.get(channelId).send({ embeds: [hellgateEmbed] });
+                    await this.client.guilds.cache.get(guildId).channels.cache.get(channelId).send({ embeds: [hellgateEmbed] });
 
                     if (alarmMsg.length > 0) {
-                        this.client.guilds.cache.get(guildId).channels.cache.get(channelId).send(alarmMsg);
+                        await this.client.guilds.cache.get(guildId).channels.cache.get(channelId).send(alarmMsg);
                         console.log(alarmMsg);
                     }
                 }
