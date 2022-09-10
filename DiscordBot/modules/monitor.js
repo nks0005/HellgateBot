@@ -1,7 +1,7 @@
 const axios = require('axios');
 const { Channel, sequelize } = require('../models/index.js');
 const Util = require('./util.js').modules;
-const { EmbedBuilder } = require("discord.js");
+const { EmbedBuilder, ALLOWED_SIZES } = require("discord.js");
 
 /**
  * 서버로 부터 데이터를 받아서
@@ -215,6 +215,108 @@ class Monitor {
         return { userName, mainHand, offHand, head, armor, shoes, cape, avgIp };
     }
 
+    /**
+     * A, B파티를 받아서 목적에 맞는 알람을 출력한다.
+     * 
+     * role, ID
+     * (1) 995137308732960778 : 높은 IP 
+     * (2) 995632668974788659 : 대자연 ( 애니그마틱 + )
+     * (3) 995632741108432896 : 그레일시커, 단검 ( 토단 )
+     * (4) 995635540613398538 : 오스키퍼 2개
+     * (5) 1017763696145084426 : 심판관부츠 + 조각용소드
+     * (6) 1017763872108728341 : 가디언 헬멧
+     * (7) 1017763962483380225
+     * (8) 1017770650275938334
+     * (9) 1017770723047116860
+     * @param {party} partyA 
+     * @param {party} partyB 
+     */
+    processAlarm(partyA, partyB) {
+        let flag_1, flag_2, flag_3_1, flag_3_2, flag_4, flag_5_1, flag_5_2, flag_6, flag_7, flag_8, flag_9 = false;
+
+        const checkIp = (avgIp) => {
+            if (avgIp > 1410) return true;
+            return false;
+        };
+
+        const checkDejayun = (mainHand) => {
+            if (mainHand.includes('에니그마틱'))
+                return true;
+            return false;
+        };
+
+        const checkTodan_1 = (mainHand) => {
+            if (mainHand.includes('그레일시커'))
+                return true;
+            return false;
+        };
+        const checkTodan_2 = (mainHand) => {
+            if (mainHand.includes('대거'))
+                return true;
+            return false;
+        };
+
+        const checkOskiper = (mainHand) => {
+            if (mainHand.includes('오스키퍼'))
+                return true;
+            return false;
+        }
+
+        const checkDiver_1 = (mainHand) => {
+            if (mainHand.includes('조각용소드'))
+                return true;
+            return false;
+        }
+        const checkDiver_2 = (shoes) => {
+            if (shoes.includes('심판관부츠'))
+                return true;
+            return false;
+        }
+
+        const checkGaudian = (head) => {
+            if (shoes.includes('가디언헬멧'))
+                return true;
+            return false;
+        }
+
+        for (const member of partyA) {
+            const { userName, mainHand, offHand, head, armor, shoes, cape, avgIp } = this.processMember(member);
+
+            flag_1 = checkIp(avgIp);
+            flag_2 = checkDejayun(mainHand);
+            flag_3_1 = checkTodan_1(mainHand);
+            flag_3_2 = checkTodan_2(mainHand);
+            flag_4 = checkOskiper(mainHand);
+            flag_5_1 = checkDiver_1(mainHand);
+            flag_5_2 = checkDiver_2(shoes);
+            flag_6 = checkGaudian(head);
+
+        }
+
+        for (const member of partyB) {
+            const { userName, mainHand, offHand, head, armor, shoes, cape, avgIp } = this.processMember(member);
+
+            flag_1 = checkIp(avgIp);
+            flag_2 = checkDejayun(mainHand);
+            flag_3_1 = checkTodan_1(mainHand);
+            flag_3_2 = checkTodan_2(mainHand);
+            flag_4 = checkOskiper(mainHand);
+            flag_5_1 = checkDiver_1(mainHand);
+            flag_5_2 = checkDiver_2(shoes);
+            flag_6 = checkGaudian(head);
+        }
+
+        let alarmMsg = ``;
+        if (flag_1) alarmMsg += `높은 IP 유저가 있습니다.<@&995137308732960778>\n`;
+        if (flag_2) alarmMsg += `대자연 유저가 있습니다.<@&995632668974788659>\n`;
+        if (flag_3_1 && flag_3_2) alarmMsg += `토단 유저가 있습니다.<@&995632741108432896>\n`;
+        if (flag_4) alarmMsg += `오스키퍼 유저가 있습니다.<@&995635540613398538>\n`;
+        if (flag_5_1 && flag_5_2) alarmMsg += `심판관 다이브가 있습니다.<@&1017763696145084426>\n`;
+        if (flag_6) alarmMsg += `가디언 헬멧 유저가 있습니다.<@&1017763872108728341>\n`
+
+        return alarmMsg;
+    }
+
     async processUpload(data) {
         try {
             if (data.status == 201 && data.data != null) {
@@ -267,43 +369,9 @@ class Monitor {
                 }
                 hellgateEmbed.addFields({ name: `☠️Loser Team`, value: arrMsgPartyB });
 
-                /*
 
-                for (const eventlog of EventLogs) {
-                    const { PlayerLogs } = eventlog;
-
-
-
-                    let checkZeroIp = false;
-                    //let offsetSupport = 2;
-                    let arrMsg = [];
-
-                    for (const playerlog of PlayerLogs) {
-                        const { userName, killType, damage, heal, avgIp, mainHand } = playerlog;
-                        const krMainHand = Util.findIndexKr(mainHand);
-                        let offset = 0;
-
-                        if (killType == 0) {
-                            arrMsg[0] = `${userName}(${avgIp}, ${krMainHand})`;
-                        } else if (killType == 1) {
-                            if (avgIp == 0) checkZeroIp = true;
-                            arrMsg[1] = `${userName}(${avgIp}, ${krMainHand})`;
-                        } else if (killType == 2) {
-                            //offset = offsetSupport++;
-                            //arrMsg[offset] = `- ${userName}(${avgIp}, ${krMainHand})|damage:(${damage})\n`;
-                        }
-                    }
-                    //let support = ``;
-                    //for (var i = 2; i < offsetSupport; i++)
-                    //    support += arrMsg[i];
-                    //if (support == ``) support = `?`;
-
-                    if (!checkZeroIp)
-                        hellgateEmbed.addFields({ name: `🗡️${arrMsg[0]}`, value: `${arrMsg[1]}` });
-
-                }
-                */
-
+                // 알람 필터링
+                alarmMsg = this.processAlarm(partyA, partyB);
 
                 // 데이터베이스에서 목적지를 찾는다.
                 const channelData = await Channel.findAll({
@@ -318,6 +386,7 @@ class Monitor {
 
                     console.log(`${match} 전송 완료 `);
                     this.client.guilds.cache.get(guildId).channels.cache.get(channelId).send({ embeds: [hellgateEmbed] });
+                    this.client.guilds.cache.get(guildId).channels.cache.get(channelId).send(alarmMsg);
                 }
             }
         } catch (err) {
