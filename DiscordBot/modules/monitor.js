@@ -235,7 +235,7 @@ class Monitor {
         let flag_1, flag_2, flag_3_1, flag_3_2, flag_4, flag_5_1, flag_5_2, flag_6, flag_7, flag_8, flag_9 = false;
 
         const checkIp = (avgIp) => {
-            if (avgIp > 1410) return true;
+            if (avgIp > 1310) return true;
             return false;
         };
 
@@ -282,6 +282,8 @@ class Monitor {
         for (const member of partyA) {
             const { userName, mainHand, offHand, head, armor, shoes, cape, avgIp } = this.processMember(member);
 
+            //console.log(mainHand, head, shoes, avgIp);
+
             flag_1 = checkIp(avgIp);
             flag_2 = checkDejayun(mainHand);
             flag_3_1 = checkTodan_1(mainHand);
@@ -295,6 +297,8 @@ class Monitor {
 
         for (const member of partyB) {
             const { userName, mainHand, offHand, head, armor, shoes, cape, avgIp } = this.processMember(member);
+
+            //console.log(mainHand, head, shoes, avgIp);
 
             flag_1 = checkIp(avgIp);
             flag_2 = checkDejayun(mainHand);
@@ -313,6 +317,8 @@ class Monitor {
         if (flag_4) alarmMsg += `오스키퍼 유저가 있습니다.<@&995635540613398538>\n`;
         if (flag_5_1 && flag_5_2) alarmMsg += `심판관 다이브가 있습니다.<@&1017763696145084426>\n`;
         if (flag_6) alarmMsg += `가디언 헬멧 유저가 있습니다.<@&1017763872108728341>\n`
+
+        console.log(flag_1, flag_2, flag_3_1, flag_3_2, flag_4, flag_5_1, flag_5_2, flag_6)
 
         return alarmMsg;
     }
@@ -386,8 +392,11 @@ class Monitor {
 
                     console.log(`${match} 전송 완료 `);
                     this.client.guilds.cache.get(guildId).channels.cache.get(channelId).send({ embeds: [hellgateEmbed] });
-                    if (alarmMsg.length > 0)
+
+                    if (alarmMsg.length > 0) {
                         this.client.guilds.cache.get(guildId).channels.cache.get(channelId).send(alarmMsg);
+                        console.log(alarmMsg);
+                    }
                 }
             }
         } catch (err) {
