@@ -1,7 +1,7 @@
 const axios = require('axios');
 const { Channel, sequelize } = require('../models/index.js');
 const Util = require('./util.js').modules;
-const { EmbedBuilder, ALLOWED_SIZES } = require("discord.js");
+const { EmbedBuilder } = require("discord.js");
 
 /**
  * 서버로 부터 데이터를 받아서
