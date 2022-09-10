@@ -2,7 +2,6 @@ const axios = require('axios');
 const { Channel, sequelize } = require('../models/index.js');
 const Util = require('./util.js').modules;
 const { EmbedBuilder } = require("discord.js");
-const { off } = require('../../Server/app.js');
 
 /**
  * 서버로 부터 데이터를 받아서
@@ -65,7 +64,7 @@ class Monitor {
                 }
                 const weapon = offHand != null ? `${mainHand}_${offHand}` : `${mainHand}`
 
-                const mixedName = `${userName}_${weapon}_${head}_${armor}_${shoes}_${cape}`;
+                const mixedName = `${userName}_${weapon}_${head}_${armor}_${shoes}_${cape}_${avgIp}`;
                 // Victim
                 if (killType == 1) {
                     victim.add(mixedName);
@@ -159,7 +158,7 @@ class Monitor {
 
 
     processMember(member) {
-        let { userName, mainHand, offHand, head, armor, shoes, cape } = this.processSplitString(member);
+        let { userName, mainHand, offHand, head, armor, shoes, cape, avgIp } = this.processSplitString(member);
 
         mainHand = Util.findIndexKr(mainHand).replace(' ', '');
         offHand = Util.findIndexKr(offHand).replace(' ', '');
@@ -168,7 +167,7 @@ class Monitor {
         shoes = Util.findIndexKr(shoes).replace(' ', '');
         cape = Util.findIndexKr(cape).replace(' ', '').replace('망토', '');
 
-        return { userName, mainHand, offHand, head, armor, shoes, cape };
+        return { userName, mainHand, offHand, head, armor, shoes, cape, avgIp };
     }
 
     /**
@@ -177,21 +176,22 @@ class Monitor {
      * @param {string} mixedName 
      */
     processSplitString(mixedName) {
-        let userName, mainHand, offHand = '', head, armor, shoes, cape;
+        let userName, mainHand, offHand = '', head, armor, shoes, cape, avgIp;
 
 
         const splited = mixedName.split('_');
 
         // 보조 무기가 없을 경우
-        if (splited.length == 6) {
+        if (splited.length == 7) {
             userName = splited[0];
             mainHand = splited[1];
             head = splited[2];
             armor = splited[3];
             shoes = splited[4];
             cape = splited[5];
+            avgIp = splited[6];
         }
-        else if (splited.length == 7) {
+        else if (splited.length == 8) {
             userName = splited[0];
             mainHand = splited[1];
             offHand = splited[2];
@@ -199,6 +199,7 @@ class Monitor {
             armor = splited[4];
             shoes = splited[5];
             cape = splited[6];
+            avgIp = splited[7];
         }
         else {
             console.log(`이상한 값 : ${mixedName}`);
@@ -206,7 +207,7 @@ class Monitor {
         }
 
 
-        return { userName, mainHand, offHand, head, armor, shoes, cape };
+        return { userName, mainHand, offHand, head, armor, shoes, cape, avgIp };
     }
 
     async processUpload(data) {
@@ -245,19 +246,19 @@ class Monitor {
 
                 // A팀 부터 작업
                 for (const member of partyA) {
-                    const { userName, mainHand, offHand, head, armor, shoes, cape } = this.processMember(member);
+                    const { userName, mainHand, offHand, head, armor, shoes, cape, avgIp } = this.processMember(member);
 
                     //console.log(userName, mainHand, offHand, head, armor, shoes, cape);
-                    arrMsgPartyA += `이름 : ${userName}\n${mainHand}${(offHand == '' ? '' : ` ${offHand}`)} ${head} ${armor} ${shoes} ${cape}\n\n`;
+                    arrMsgPartyA += `[${mainHand}] ${userName} (${avgIp})\n${(offHand == '' ? '' : ` ${offHand}`)} ${head} ${armor} ${shoes} ${cape}\n\n`;
                 }
                 hellgateEmbed.addFields({ name: `🗡️Winner Team`, value: arrMsgPartyA });
 
                 // B팀 작업
                 for (const member of partyB) {
-                    const { userName, mainHand, offHand, head, armor, shoes, cape } = this.processMember(member);
+                    const { userName, mainHand, offHand, head, armor, shoes, cape, avgIp } = this.processMember(member);
 
                     //console.log(userName, mainHand, offHand, head, armor, shoes, cape);
-                    arrMsgPartyB += `이름 : ${userName}\n${mainHand}${(offHand == '' ? '' : ` ${offHand}`)} ${head} ${armor} ${shoes} ${cape}\n\n`;
+                    arrMsgPartyB += `[${mainHand}] ${userName} (${avgIp})\n${(offHand == '' ? '' : ` ${offHand}`)} ${head} ${armor} ${shoes} ${cape}\n\n`;
                 }
                 hellgateEmbed.addFields({ name: `☠️Loser Team`, value: arrMsgPartyB });
 

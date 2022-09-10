@@ -2,7 +2,7 @@ const jsonItems = require('./items.json');
 
 const TYPE = {
     C_5: 18,
-    C_20: 20,
+    C_20: 24,
     H_2: 33,
     H_5: 34,
     H_10: 36,

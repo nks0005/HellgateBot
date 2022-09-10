@@ -2,7 +2,7 @@ const jsonItems = require('./items.json');
 
 const TYPE = {
     C_5: 18,
-    C_20: 20,
+    C_20: 24,
     H_2: 33,
     H_5: 34,
     H_10: 36,
@@ -30,7 +30,7 @@ const m_URL = {
 const killType = { Killer: 0, Victim: 1, Support: 2 };
 
 class Util {
-    constructor() {}
+    constructor() { }
 
     static getType() { return TYPE; }
     static getKillType() { return killType; }
