@@ -1,6 +1,7 @@
 const { Client, GatewayIntentBits } = require('discord.js');
 const { token, wanthealcomeId } = require('./config/discord_config.json');
 const { joinVoiceChannel } = require('@discordjs/voice');
+const Util = require('./modules/util.js').modules;
 
 
 
@@ -19,11 +20,23 @@ client.once('ready', () => {
         adapterCreator: client.guilds.cache.get("748345742158200832").voiceAdapterCreator
     });
 
-    var date = new Date();
-    var strKrTime = `Updated : ${date.getHours()}:${date.getMinutes()}`;
+    const err = async() => {
+        while (true) {
+            try {
 
-    client.guilds.cache.get("748345742158200832").channels.cache.get("1017509122729574511").setName(strKrTime);
+                var date = new Date();
+                var strKrTime = `Updated : ${date.getHours()}:${date.getMinutes()}`;
 
+                client.guilds.cache.get("748345742158200832").channels.cache.get("1017509122729574511").setName(strKrTime);
+                console.log(strKrTime);
+                await Util.sleep(60000);
+
+            } catch (err) {
+                console.error(err);
+            }
+        }
+    }
+    err();
 });
 
 
