@@ -16,7 +16,7 @@ const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 client.once('ready', () => {
     console.log('Ready!');
 
-    m = new Monitor(5000, client);
+    m = new Monitor(10000, client);
     m.updateCycle();
 
     // 채널 접속
