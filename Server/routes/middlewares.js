@@ -1,4 +1,4 @@
-const { BattleLog, EventLog, PlayerLog, sequelize } = require('../models/index.js');
+const { BattleLog, EventLog, PlayerLog, sequelize, Sequelize: { Op } } = require('../models/index.js');
 const axios = require('axios');
 const Util = require('../modules/util.js').modules;
 
@@ -146,4 +146,47 @@ exports.downloadKillboard = async(req, res, next) => {
         console.error(err);
         next('error');
     }
+}
+
+/**
+ * BattleLog 테이블로부터 조건에 맞는 컬럼 갯수를 얻어온다.
+ *
+ * @param {uint} req.crystal 크리스탈
+ * @param {uint} req.type 타입
+ */
+exports.getCountKillboard = async(req, res, next) => {
+    let { crystal, type } = req;
+
+    try {
+        // KR 시간을 UTC시간으로 변환
+        let endTime = new Date().getTime();
+        //endTime -= (9 * 60 * 60 * 1000);
+
+        let startTime = new Date().getTime();
+        startTime -= (1) * 60 * 60 * 1000;
+
+        console.log(`newDate : ${new Date(startTime)}, oldDate : ${new Date(endTime)}`);
+
+        const count = await BattleLog.count({
+            where: {
+                crystal: crystal,
+                type: type,
+                logTime: {
+                    [Op.between]: [startTime, endTime],
+                }
+            }
+        });
+
+        console.log(`crystal : ${crystal}, type : ${type}의 개수 : ${count}`);
+
+        if (count > 0) {
+            res.status(201).send(`${count}`);
+        } else {
+            res.status(202).send('Nothing');
+        }
+
+    } catch (err) {
+        console.error(err);
+    }
+
 }

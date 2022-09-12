@@ -23,14 +23,15 @@ const m_URL = {
     DOUBLE: `DOUBLE/`,
     FIVE: `FIVE/`,
     TEN: `TEN/`,
-    TWENTY: `TWENTY/`
+    TWENTY: `TWENTY/`,
+    COUNT: `COUNT/`
 };
 
 
 const killType = { Killer: 0, Victim: 1, Support: 2 };
 
 class Util {
-    constructor() { }
+    constructor() {}
 
     static getType() { return TYPE; }
     static getKillType() { return killType; }
