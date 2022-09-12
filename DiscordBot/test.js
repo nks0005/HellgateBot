@@ -20,23 +20,29 @@ client.once('ready', () => {
         adapterCreator: client.guilds.cache.get("748345742158200832").voiceAdapterCreator
     });
 
-    const err = async() => {
+    const err = async(client) => {
         while (true) {
+            const Client = client;
             try {
 
                 var date = new Date();
-                var strKrTime = `Updated : ${date.getHours()}:${date.getMinutes()}`;
+                let filteredTime = (date.getHours() < 10 ? '0' + date.getHours() : date.getHours()) + ':' + (date.getMinutes() < 10 ? '0' + date.getMinutes() : date.getMinutes());
+                const strKrTime = `Updated : ${filteredTime} KR`;
 
-                client.guilds.cache.get("748345742158200832").channels.cache.get("1017509122729574511").setName(strKrTime);
+                Client.guilds.cache.get("748345742158200832").channels.cache.get("1017509122729574511").setName(strKrTime).then(() => { console.log('성공') }).catch((err) => { console.error('에러') });
                 console.log(strKrTime);
-                await Util.sleep(60000);
+                await Util.sleep(5 * 60 * 1000); // 5분마다
+
+                // 채널 업데이트는 10분당 2개의 요청만 가능하다.
+                // 일반 요청은 10분당 10,000개만 가능하다.
+                // https://stackoverflow.com/questions/62103163/how-often-can-i-rename-discord-channels-name
 
             } catch (err) {
                 console.error(err);
             }
         }
     }
-    err();
+    err(client);
 });
 
 
