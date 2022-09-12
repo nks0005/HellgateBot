@@ -3,6 +3,8 @@ const { token, wanthealcomeId } = require('./config/discord_config.json');
 const { Channel, sequelize } = require('./models/index.js');
 const Monitor = require('./modules/monitor.js').modules;
 const { joinVoiceChannel } = require('@discordjs/voice');
+const Util = require('./modules/util.js').modules;
+
 
 sequelize.sync({ force: false }).then(() => {
         console.log('데이터베이스 연결 성공');
