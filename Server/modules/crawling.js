@@ -110,6 +110,8 @@ class crawling {
                                 // console.log('2', checkOverIp, healer, id);
 
                                 if (!checkOverIp) retType |= 1;
+                                else checkOverIp
+                                return 0;
 
                             } else if (PartyMemberCount == 5 && (totalPlayers == 10 || totalPlayers == 9) && (totalKills >= 5 && totalKills < 10)) {
                                 for (const support of Participants) {
@@ -124,6 +126,8 @@ class crawling {
                                 //console.log('5', checkOverIp, healer, id);
 
                                 if (!checkOverIp && healer) retType |= 2;
+                                else checkOverIp
+                                return 0;
 
                             } else if (PartyMemberCount == 10 && (totalPlayers == 19 || totalPlayers == 20) && (totalKills >= 10 && totalKills < 20)) {
                                 for (const support of Participants) {
@@ -137,6 +141,8 @@ class crawling {
                                 //console.log('10', checkOverIp, healer >= 2, id);
 
                                 if (!checkOverIp && healer) retType |= 4;
+                                else checkOverIp
+                                return 0;
                             }
                         }
                     }
