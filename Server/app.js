@@ -18,7 +18,7 @@ app.set('view engine', 'jade');
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser());
+// app.use(cookieParser());
 
 // 데이터 베이스 동기화
 sequelize.sync({ force: false }).then(() => {

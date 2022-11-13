@@ -2,3 +2,6 @@
 /DiscordBot/config
 /DiscordBot/node_modules
 /Server/node_modules
+/crawlingBot/config/config.json
+/crawlingBot/.env
+/crawlingBot/node_modules
