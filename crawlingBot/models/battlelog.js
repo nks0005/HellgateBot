@@ -3,61 +3,47 @@ const Sequelize = require('sequelize');
 module.exports = class BattleLog extends Sequelize.Model {
     static init(sequelize) {
         return super.init({
+
             battleId: {
                 type: Sequelize.INTEGER.UNSIGNED,
                 allowNull: false,
                 unique: true
             },
 
-            totalKills: {
-                type: Sequelize.INTEGER.UNSIGNED,
-                allowNull: false,
-            },
-
-            totalPlayers: {
-                type: Sequelize.INTEGER.UNSIGNED,
-                allowNull: false,
-            },
-
-            logTime: {
+            startTime: {
                 type: Sequelize.DATE,
                 allowNull: false,
             },
 
-            send: {
+            totalFame: {
+                type: Sequelize.INTEGER.UNSIGNED,
+                allowNull: false
+            },
+
+            totalKills: {
+                type: Sequelize.INTEGER.UNSIGNED,
+                allowNull: false
+            },
+
+            matchType: {
                 type: Sequelize.BOOLEAN,
-                allowNull: false,
+                allowNull: false
+            },
+
+            check: {
+                type: Sequelize.BOOLEAN,
                 defaultValue: false
-            },
-
-            checkTotal: {
-                type: Sequelize.BOOLEAN,
-                allowNull: false,
-                defaultValue: false
-            },
-
-            crystal: {
-                type: Sequelize.BOOLEAN,
-                allowNull: false,
-            },
-
-            type: {
-                type: Sequelize.BOOLEAN,
-                allowNull: false,
-            },
+            }
         }, {
             sequelize,
             timestamps: true,
-            underscored: false,
-            modelName: 'BattleLog',
-            tableName: 'battlelogs',
             paranoid: true,
-            charset: 'utf8',
-            collate: 'utf8_general_ci',
+            underscored: false
         });
     }
 
     static associate(db) {
-        db.BattleLog.hasMany(db.EventLog, { foreignKey: 'battleId', sourceKey: 'battleId' });
+        db.BattleLog.hasOne(db.WinTeam, { foreignKey: 'battleId', sourceKey: 'battleId' });
+        db.BattleLog.hasOne(db.LoseTeam, { foreignKey: 'battleId', sourceKey: 'battleId' });
     }
 }

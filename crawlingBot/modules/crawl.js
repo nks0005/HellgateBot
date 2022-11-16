@@ -1,6 +1,7 @@
 const axios = require('axios');
-const { ReactionUserManager } = require('discord.js');
 const jsonItems = require('./items.json');
+
+const { User, Gear, BattleLog, LoseTeam, WinTeam } = require('../models');
 
 const sleep = async(ms) => {
     return new Promise(resolve => { setTimeout(resolve, ms) });
@@ -48,6 +49,103 @@ const Type2Index = (Type) => {
 
 class Crawl {
     constructor() {
+        this.minIp = 1100;
+        this.maxIp = 1450;
+
+
+        const { sequelize } = require('../models/index.js');
+        this.sequelize = sequelize;
+
+        // 데이터 베이스 동기화
+        this.sequelize.sync({ force: false }).then(() => {
+                console.log('데이터베이스 연결 성공');
+            })
+            .catch((err) => {
+                console.error(err);
+            });
+
+
+    }
+
+
+    async processDb(battle, team, flag) {
+        // console.log(battle);
+        //console.dir(team, { depth: 3 });
+
+        const transaction = await this.sequelize.transaction();
+        try {
+
+            // == 트랜젝션 시작 ==
+            // = BattleLog 처리 =
+
+            // 기존 Battle Log에 존재하는지 확인
+            {
+                const { battleId } = battle;
+                let retBattlelog = await BattleLog.findOne({
+                    where: {
+                        battleId: battleId
+                    }
+                });
+
+                // 존재하다면
+                if (retBattlelog != null) {
+                    await transaction.commit();
+                    return -1;
+                }
+            }
+
+            // Battle Log에 새로운 데이터 생성
+            let retBattleLog;
+            const { battleId, startTime, totalFame, totalKills, matchType } = battle;
+            retBattleLog = await BattleLog.create({
+                battleId: battleId,
+                startTime: startTime,
+                totalFame: totalFame,
+                totalKills: totalKills,
+                matchType: matchType
+            }, { transaction });
+
+            //console.log(ret.id, ret.battleId);
+
+            const teamKeys = Object.keys(team);
+            for (var i = 0; i < teamKeys.length; i++) {
+                const teamKey = teamKeys[i];
+                const { userId, name, guild, ally } = team[teamKey]['user'];
+                const { mainHand, offHand, head, armor, cape } = team[teamKey]['equip'];
+
+
+                console.log(userId, name, guild, ally);
+                console.log(mainHand, offHand, head, armor, cape);
+
+                // = User 처리 =
+                // check User.
+                let checkUser = await User.findOne({
+                    where: { userId: userId }
+                });
+
+                if (checkUser == null) {
+                    // create
+
+
+                }
+
+
+
+
+
+                // = Equip 처리 =
+
+                // = Team 처리 =
+            }
+
+            await transaction.commit();
+        } catch (err) {
+            await transaction.rollback();
+            console.error(err);
+        } finally {
+
+        }
+
 
     }
 
@@ -65,11 +163,61 @@ class Crawl {
         return res.data;
     }
 
+    async processUsersToTeam(users, team, battleId) {
+        let tmpTeam = {};
+
+        const userKeys = Object.keys(users);
+        for (var i = 0; i < userKeys.length; i++) {
+            let userKey = userKeys[i];
+
+            let idCheck = false;
+            const teamKeys = Object.keys(team);
+            for (var j = 0; j < teamKeys.length; j++) {
+                let teamKey = teamKeys[j];
+
+                //console.log(userKey, teamKey);
+                if (userKey == teamKey) {
+                    idCheck = true;
+                    break;
+                }
+            }
+            if (idCheck == false) continue;
+
+            // console.log(users[userKey]);
+            // User 정보 생성
+            let tmpUser = {
+                userId: users[userKey].userId,
+                name: users[userKey].name,
+                guild: users[userKey].guildName,
+                ally: users[userKey].allianceName
+            };
+
+            // Equip 정보 생성
+            let tmpEquip = {
+                mainHand: users[userKey].mainHand,
+                offHand: users[userKey].offHand != undefined ? users[userKey].offHand : null,
+                head: users[userKey].head,
+                armor: users[userKey].armor,
+                cape: users[userKey].cape
+            };
+
+            tmpTeam[userKey] = {
+                user: tmpUser,
+                equip: tmpEquip,
+
+                ip: users[userKey].avgIp,
+                battleId: battleId
+            };
+        }
+
+        return tmpTeam;
+    }
+
     async processEquipItems(Users, groupMember) {
         let tmpUsers = Users;
         let tmpGroupMember = groupMember;
 
-        let { Id, Equipment, AverageItemPower } = tmpGroupMember;
+        let { Id, Equipment, AverageItemPower, SupportHealingDone } = tmpGroupMember;
         Id = `${Id}`;
         //console.dir(groupMember, { depth: 3 });
 
@@ -78,6 +226,11 @@ class Crawl {
         if (AverageItemPower != 0 && AverageItemPower != NaN && AverageItemPower != undefined) {
             if (!('avgIp' in tmpUsers[Id]))
                 tmpUsers[Id]['avgIp'] = parseInt(AverageItemPower);
+        }
+
+        if (SupportHealingDone != 0 && SupportHealingDone != NaN && SupportHealingDone != undefined) {
+            if (!('heal' in tmpUsers[Id]))
+                tmpUsers[Id]['heal'] = parseInt(SupportHealingDone);
         }
 
         // add Equipments
@@ -105,13 +258,13 @@ class Crawl {
         }
 
         if (Cape != null) {
-            tmpUsers[Id]['Cape'] = Type2Index(Cape);
+            tmpUsers[Id]['cape'] = Type2Index(Cape);
         }
 
         return tmpUsers;
     }
 
-    async process55Hellgate(id, totalKills, players) {
+    async processHellgate(id, totalKills, players) {
         // process user
         let Users = {};
 
@@ -165,13 +318,14 @@ class Crawl {
 
         let battleId = 0;
 
+
         // KillArea : 'OPEN_WORLD'
         // groupMemberCount : 4
         for (const event of events) {
             const { groupMemberCount, KillArea, BattleId, Killer, Victim, Participants, GroupMembers } = event;
 
-            if (KillArea != 'OPEN_WORLD') return;
-            if (!(groupMemberCount == 5 || groupMemberCount == 10)) return;
+            if (KillArea != 'OPEN_WORLD') return { victory: null, defeat: null, ret: -1 };
+            if (!(groupMemberCount == 5 || groupMemberCount == 10)) return { victory: null, defeat: null, ret: -1 };
 
             battleId = BattleId;
 
@@ -206,6 +360,9 @@ class Crawl {
             // killer
             {
                 Users = await this.processEquipItems(Users, Killer);
+                const { AverageItemPower } = Killer;
+                if (AverageItemPower != 0 && (AverageItemPower < this.minIp || AverageItemPower > this.maxIp))
+                    return { victory: null, defeat: null, ret: -1 };
             }
 
             // Victim
@@ -216,24 +373,77 @@ class Crawl {
                 const { AverageItemPower } = Victim;
                 if (AverageItemPower != 0)
                     teamB.count = teamB.count + 1;
+
+                if (AverageItemPower != 0 && (AverageItemPower < this.minIp || AverageItemPower > this.maxIp))
+                    return { victory: null, defeat: null, ret: -1 };
             }
 
             // part
             {
                 for (const part of Participants) {
+
+                    const { AverageItemPower } = part;
+                    if (AverageItemPower != 0 && (AverageItemPower < this.minIp || AverageItemPower > this.maxIp))
+                        return { victory: null, defeat: null, ret: -1 };
+
                     Users = await this.processEquipItems(Users, part);
                 }
             }
 
         }
 
-        console.log(Users);
-        console.dir(teamA, { deapth: 3 });
-        console.dir(teamB, { deapth: 3 });
-        console.log(`https://albionbattles.com/battles/${battleId}`);
+        // 힐 유저 체크 ( 2명 이상 )
+        let checkHealer = 0;
+        const userKey = Object.keys(Users);
+        for (var i = 0; i < userKey.length; i++) {
+            var key = userKey[i];
+            if ('heal' in Users[key])
+                checkHealer++;
+        }
+        //console.dir(Users, { depth: 3 });
+        if (checkHealer < 2) return { victory: null, defeat: null, ret: -1 };
 
         //console.log(Users);
+
+
+        /*
+        console.log(`https://albionbattles.com/battles/${battleId}
+        count : ${Object.keys(players).length}
+        `);
+        */
+
+        // Winner : teamA
+        if (teamB.count == (Object.keys(teamB).length - 1)) {
+            delete teamB.count;
+            delete teamA.count;
+
+            //console.log('Winner : teamA');
+            //console.dir(teamA, { depth: 3 });
+            ///console.dir(teamB, { depth: 3 });
+            //console.dir(Users, { depth: 3 });
+
+            victory = await this.processUsersToTeam(Users, teamA, battleId);
+            defeat = await this.processUsersToTeam(Users, teamB, battleId);
+        } else {
+            delete teamB.count;
+            delete teamA.count;
+
+            //console.log('Winner : teamB');
+            //console.dir(teamA, { depth: 3 });
+            //console.dir(teamB, { depth: 3 });
+            //console.dir(Users, { depth: 3 });
+
+            victory = await this.processUsersToTeam(Users, teamB, battleId);
+            defeat = await this.processUsersToTeam(Users, teamA, battleId);
+        }
+
+        //console.dir(victory, { depth: 3 });
+        //console.dir(defeat, { depth: 3 });
+
+
+        return { victory: victory, defeat: defeat, ret: 0 };
     }
+
 
 
     async processKillboard(recentKillboard) {
@@ -250,28 +460,82 @@ class Crawl {
         `);
         */
 
+        let teamVictory = {};
+        let teamDefeat = {};
+        let find = false;
+        let matchType = 0;
+
         // == test 1
         // is 5v5 hellgate?
         if (totalPlayers == 10 && totalKills >= 5 && totalKills < 10) {
             // its 5v5 hellgate.
-            await this.process55Hellgate(id, totalKills, players);
+            let { victory, defeat, ret } = await this.processHellgate(id, totalKills, players);
 
+            if (ret == 0) {
+                teamVictory = victory;
+                teamDefeat = defeat;
+                find = true;
+                matchType = 5;
+            }
+        }
+
+        // is 10v10 hellgate?
+        if (totalPlayers == 20 && totalKills >= 10 && totalKills < 20) {
+            let { victory, defeat, ret } = await this.processHellgate(id, totalKills, players);
+
+            if (ret == 0) {
+                teamVictory = victory;
+                teamDefeat = defeat;
+                find = true;
+                matchType = 10;
+            }
+        }
+
+        if (find == false)
+            return;
+
+        /*
+        console.log(`---------------`);
+        console.log(`승리팀`);
+        console.dir(teamVictory, { depth: 3 });
+        console.log(`패배팀`);
+        console.dir(teamDefeat, { depth: 3 });
+        console.log(`---------------`);
+        */
+        // 날짜, 총페임 추가
+        let battleLog = { battleId: id, startTime: startTime, totalKills: totalKills, totalFame: totalFame, matchType: matchType }
+
+        // DB에 데이터를 넣어야 한다.
+        await this.processDb(battleLog, teamVictory, 'victory');
+        await this.processDb(battleLog, teamDefeat, 'defeat');
+    }
+
+    async main(i) {
+        const index = i;
+        try {
+            let urlKillboard = `https://gameinfo.albiononline.com/api/gameinfo/battles?offset=${index==0?0:index*50}&limit=50&sort=recent`;
+            //console.log(index);
+            let recentKillboards = await this.getDataFromUrl(urlKillboard);
+
+            for (const recentKillboard of recentKillboards) {
+                await this.processKillboard(recentKillboard);
+
+            }
+        } catch (err) {
+            console.error(err);
         }
     }
 
     async start() {
         // 1. api로 부터 데이터를 얻어온다.
-        const urlKillboard = `
-        https://gameinfo.albiononline.com/api/gameinfo/battles?offset=0&limit=50&sort=recent`;
-        const recentKillboards = await this.getDataFromUrl(urlKillboard);
-
-        for (const recentKillboard of recentKillboards) {
-            await this.processKillboard(recentKillboard);
+        for (var i = 0; i < 10; i++) { // 최대 0 ~ 10000 = 0 ~ 200
+            this.main(i);
         }
-
     }
 }
 
 const crawl = new Crawl();
 
 crawl.start();
+
+module.exports = Crawl;
