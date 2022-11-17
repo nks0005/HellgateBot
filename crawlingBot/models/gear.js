@@ -29,10 +29,7 @@ module.exports = class Gear extends Sequelize.Model {
                 type: Sequelize.STRING(100)
             },
 
-            count: {
-                type: Sequelize.INTEGER.UNSIGNED,
-                defaultValue: 0
-            },
+
 
         }, {
             sequelize

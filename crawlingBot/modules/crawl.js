@@ -68,20 +68,20 @@ class Crawl {
     }
 
 
-    async processDb(battle, team, flag) {
+    async processDb(battle, team, winFlag, matchType) {
         // console.log(battle);
         //console.dir(team, { depth: 3 });
 
-        const transaction = await this.sequelize.transaction();
         try {
 
             // == 트랜젝션 시작 ==
             // = BattleLog 처리 =
+            let retBattlelog;
 
             // 기존 Battle Log에 존재하는지 확인
             {
                 const { battleId } = battle;
-                let retBattlelog = await BattleLog.findOne({
+                retBattlelog = await BattleLog.findOne({
                     where: {
                         battleId: battleId
                     }
@@ -89,33 +89,42 @@ class Crawl {
 
                 // 존재하다면
                 if (retBattlelog != null) {
-                    await transaction.commit();
-                    return -1;
+                    // check LoseTeam
+                    let checkLoseTeam = await LoseTeam.findOne({
+                        where: {
+                            battleId: battleId
+                        }
+                    });
+
+                    if (checkLoseTeam != null) {
+                        return -1;
+                    }
+                } else {
+                    // Battle Log에 새로운 데이터 생성
+                    const { battleId, startTime, totalFame, totalKills, matchType } = battle;
+                    retBattlelog = await BattleLog.create({
+                        battleId: battleId,
+                        startTime: startTime,
+                        totalFame: totalFame,
+                        totalKills: totalKills,
+                        matchType: matchType
+                    });
                 }
             }
 
-            // Battle Log에 새로운 데이터 생성
-            let retBattleLog;
-            const { battleId, startTime, totalFame, totalKills, matchType } = battle;
-            retBattleLog = await BattleLog.create({
-                battleId: battleId,
-                startTime: startTime,
-                totalFame: totalFame,
-                totalKills: totalKills,
-                matchType: matchType
-            }, { transaction });
-
             //console.log(ret.id, ret.battleId);
 
+            const { battleId, startTime, totalFame, totalKills, matchType } = battle;
             const teamKeys = Object.keys(team);
             for (var i = 0; i < teamKeys.length; i++) {
                 const teamKey = teamKeys[i];
+                let { ip } = team[teamKey];
                 const { userId, name, guild, ally } = team[teamKey]['user'];
-                const { mainHand, offHand, head, armor, cape } = team[teamKey]['equip'];
+                let { mainHand, offHand, head, armor, shoes, cape } = team[teamKey]['equip'];
 
 
-                console.log(userId, name, guild, ally);
-                console.log(mainHand, offHand, head, armor, cape);
+                //console.log(userId, name, guild, ally);
+                //console.log(mainHand, offHand, head, armor, shoes, cape);
 
                 // = User 처리 =
                 // check User.
@@ -125,22 +134,103 @@ class Crawl {
 
                 if (checkUser == null) {
                     // create
-
-
+                    try {
+                        checkUser = await User.create({
+                            userId: userId,
+                            name: name,
+                            guild: guild,
+                            ally: ally,
+                        });
+                    } catch (err) {
+                        checkUser = await User.findOne({
+                            where: { userId: userId }
+                        });
+                    }
                 }
 
+                //console.log(checkUser.id);
+                if (mainHand == undefined) {
+                    mainHand = 0;
+                    console.log(`battleId : ${battleId}
+                name : ${name}`)
+                }
+                if (offHand == undefined) offHand = null;
+                if (head == undefined) head = null;
+                if (armor == undefined) armor = null;
+                if (shoes == undefined) shoes = null;
+                if (cape == undefined) cape = null;
 
+                // = process Gear =
+                let checkGear = await Gear.findOne({
+                    where: {
+                        mainHand: mainHand,
+                        offHand: offHand,
+                        head: head,
+                        armor: armor,
+                        shoes: shoes,
+                        cape: cape
+                    }
+                });
+                if (checkGear == null) {
+                    // create
+                    checkGear = await Gear.create({
+                        mainHand: mainHand,
+                        offHand: offHand,
+                        head: head,
+                        armor: armor,
+                        shoes: shoes,
+                        cape: cape
+                    });
+                }
 
+                //console.log(checkGear.id);
 
-
-                // = Equip 처리 =
+                if (ip == null || ip == undefined) ip = 0;
 
                 // = Team 처리 =
+                if (winFlag) {
+                    // victory
+                    await WinTeam.create({
+                        battleId: battleId,
+                        userId: checkUser.id,
+                        equipId: checkGear.id,
+                        ip: ip
+                    });
+                } else {
+                    // defeat
+                    await LoseTeam.create({
+                        battleId: battleId,
+                        userId: checkUser.id,
+                        equipId: checkGear.id,
+                        ip: ip
+                    });
+                }
+
+                // up count
+                if (winFlag) {
+                    if (matchType == 5) {
+                        await User.update({
+                            win55: (checkUser.win55 + 1)
+                        }, { where: { id: checkUser.id } });
+                    } else {
+                        await User.update({
+                            win1010: (checkUser.win1010 + 1)
+                        }, { where: { id: checkUser.id } });
+                    }
+                } else {
+                    if (matchType == 5) {
+                        await User.update({
+                            lose55: (checkUser.lose55 + 1)
+                        }, { where: { id: checkUser.id } });
+                    } else {
+                        await User.update({
+                            lose1010: (checkUser.lose1010 + 1)
+                        }, { where: { id: checkUser.id } });
+                    }
+                }
             }
 
-            await transaction.commit();
         } catch (err) {
-            await transaction.rollback();
             console.error(err);
         } finally {
 
@@ -151,13 +241,19 @@ class Crawl {
 
 
     async getDataFromUrl(url) {
-        const res = await axios(url);
-
+        let res;
+        try {
+            res = await axios(url);
+        } catch (err) {
+            console.log(`${url}로 부터 데이터를 정상적으로 얻지 못했습니다. 1초 뒤 다시 시도합니다.`);
+            await sleep(1000);
+            return await this.getDataFromUrl(url);
+        }
         if (res.status != 200 || res.data == null) {
             console.log(`${url}로 부터 데이터를 정상적으로 얻지 못했습니다. 10초 뒤 다시 시도합니다.`);
 
             await sleep(10000);
-            return this.getDataFromUrl(url);
+            return await this.getDataFromUrl(url);
         }
 
         return res.data;
@@ -198,6 +294,7 @@ class Crawl {
                 offHand: users[userKey].offHand != undefined ? users[userKey].offHand : null,
                 head: users[userKey].head,
                 armor: users[userKey].armor,
+                shoes: users[userKey].shoes,
                 cape: users[userKey].cape
             };
 
@@ -254,7 +351,7 @@ class Crawl {
         }
 
         if (Shoes != null) {
-            tmpUsers[Id]['armor'] = Type2Index(Shoes);
+            tmpUsers[Id]['shoes'] = Type2Index(Shoes);
         }
 
         if (Cape != null) {
@@ -506,8 +603,8 @@ class Crawl {
         let battleLog = { battleId: id, startTime: startTime, totalKills: totalKills, totalFame: totalFame, matchType: matchType }
 
         // DB에 데이터를 넣어야 한다.
-        await this.processDb(battleLog, teamVictory, 'victory');
-        await this.processDb(battleLog, teamDefeat, 'defeat');
+        await this.processDb(battleLog, teamVictory, true, matchType);
+        await this.processDb(battleLog, teamDefeat, false, matchType);
     }
 
     async main(i) {
@@ -519,23 +616,21 @@ class Crawl {
 
             for (const recentKillboard of recentKillboards) {
                 await this.processKillboard(recentKillboard);
-
             }
         } catch (err) {
             console.error(err);
         }
     }
 
-    async start() {
+    async start(start, end) {
         // 1. api로 부터 데이터를 얻어온다.
-        for (var i = 0; i < 10; i++) { // 최대 0 ~ 10000 = 0 ~ 200
+        for (var i = start; i < end; i++) { // 최대 0 ~ 10000 = 0 ~ 200
             this.main(i);
         }
     }
 }
 
-const crawl = new Crawl();
-
-crawl.start();
+let crawl = new Crawl();
+crawl.start(0, 200);
 
 module.exports = Crawl;
