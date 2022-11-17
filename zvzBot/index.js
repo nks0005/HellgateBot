@@ -2,7 +2,55 @@
 
 const axios = require('axios');
 const crypto = require('crypto');
+const { max } = require('../crawlingBot/models/battlelog');
+const jsonItems = require('./items.json');
 
+const findIndex2Kr = (index) => {
+
+    for (const item of jsonItems) {
+        if (index == item['Index']) {
+            let ret = item['LocalizedNames']['KO-KR'];
+            ret = ret.replace('장로의 ', '');
+
+            return ret;
+        }
+    }
+}
+const filterItem = (item) => {
+    let filterItem = ``;
+    let start = item.indexOf('_') + 1;
+    let end = item.lastIndexOf('@');
+
+    if (end == -1)
+        filterItem = item.substring(start);
+    else
+        filterItem = item.substring(start, end);
+
+    return filterItem;
+}
+
+const findItemIndex = (itemName) => {
+    let tmpItemName = 'T8_' + itemName;
+
+    for (const item of jsonItems) {
+        if (tmpItemName == item['UniqueName']) {
+            let ret = item['Index'];
+
+            return ret;
+        }
+    }
+}
+
+const Type2Index = (Type) => {
+    if (Type == null) return Type;
+
+    Type = Type['Type'];
+
+    const item = filterItem(`${Type}`);
+    const index = parseInt(findItemIndex(`${item}`));
+
+    return index;
+}
 class ZvzMetaViewer {
     constructor() {
         const shotCaller = [];
@@ -32,7 +80,7 @@ class ZvzMetaViewer {
 
         if (Equipment.MainHand != null)
             if (Id in Users) {
-                Users[Id].mainHand = Equipment.MainHand.Type;
+                Users[Id].mainHand = Type2Index(Equipment.MainHand);
                 Users[Id].ally = AllianceName;
                 Users[Id].userId = Id;
             }
@@ -95,9 +143,11 @@ class ZvzMetaViewer {
         for (var i = 0; i < playerKeys.length; i++) {
             const playerKey = playerKeys[i];
 
-            const { name, id, allianceName } = players[playerKey];
+            const { name, id, guildName, allianceName } = players[playerKey];
 
-            Users[id] = { name: name, ally: allianceName };
+            if ((guild != null && guildName == guild) || (ally != null && allianceName == ally)) {
+                Users[id] = { name: name, guild: guildName, ally: allianceName };
+            }
         }
 
         // console.dir(Users, { depth: 3 });
@@ -154,6 +204,7 @@ class ZvzMetaViewer {
         //console.log('boom party');
         //console.dir(boomParty, { depth: 3 });
 
+        /*
         console.log(Object.keys(fullParty).length);
         console.log(Object.keys(boomParty).length);
 
@@ -164,9 +215,101 @@ class ZvzMetaViewer {
         console.log(`=== boom party ===`);
         this.printParty(boomParty, Users);
         console.log(`=== end ===`);
+        */
+
+        // console.dir(Users, { depth: 3 });
+
+        let Weapons = {};
+
+        {
+            const usersKeys = Object.keys(Users);
+            for (var i = 0; i < usersKeys.length; i++) {
+                const usersKey = usersKeys[i];
+
+                const tmpUser = Users[usersKey];
+                if (!(tmpUser.mainHand in Weapons)) {
+                    Weapons[tmpUser.mainHand] = { count: 0 };
+                }
+
+                Weapons[tmpUser.mainHand].count = Weapons[tmpUser.mainHand].count + 1;
+            }
+        }
+
+
+        const tankDomain = [6789, 6487, 6689, 6668, 5458];
+        let tankList = {};
+
+        const supportDomain = [5498, 5034, 5337, 5074, 5418, 5438, 5398, 6628, 6809, 6749, 6527, 6709, 5478, 6648];
+        let supportList = {};
+
+        const healDomain = [5720, 5760, 5780, 5619, 5659];
+        let healList = {};
+
+        let dealList = {};
+
+        {
+            console.log(`\`\`\`md\n== 킬보드 : ${battleId} 검색 : ${guild} / ${ally} ==`)
+            console.log('=======================');
+            let maxCount = 0;
+            const weaponsKeys = Object.keys(Weapons);
+            for (var i = 0; i < weaponsKeys.length; i++) {
+                const weaponsKey = weaponsKeys[i];
+                const weaponCount = Weapons[weaponsKey].count;
+                const intWeaponKey = parseInt(weaponsKey);
+
+                if (tankDomain.includes(intWeaponKey)) {
+                    // tank
+                    if (!(weaponsKey in tankList)) {
+                        tankList[weaponsKey] = { count: weaponCount };
+                    }
+                } else if (supportDomain.includes(intWeaponKey)) {
+                    // support
+                    if (!(weaponsKey in supportList)) {
+                        supportList[weaponsKey] = { count: weaponCount };
+                    }
+                } else if (healDomain.includes(intWeaponKey)) {
+                    // heal
+                    if (!(weaponsKey in healList)) {
+                        healList[weaponsKey] = { count: weaponCount };
+                    }
+                } else {
+                    // deal
+                    if (!(weaponsKey in dealList)) {
+                        dealList[weaponsKey] = { count: weaponCount };
+                    }
+                }
+
+                maxCount = maxCount + weaponCount;
+            }
+            console.log(`== 총 인원 : ${maxCount} == `);
+
+            const printList = (list, prefix) => {
+                for (var i = 0, keys = Object.keys(list); i < keys.length; i++) {
+                    const key = keys[i];
+                    const count = list[key].count;
+
+                    console.log(`┣ ${findIndex2Kr(key)} (${count} 명)`);
+                }
+            }
+            console.log(`= 🛡️ 클랩 탱커 리스트 🛡️ =`);
+            printList(tankList);
+            console.log(`= 🌈 서포터 리스트 🌈 =`);
+            printList(supportList);
+            console.log(`= ❤️‍🩹 힐러 리스트 ❤️‍🩹=`);
+            printList(healList);
+            console.log(`= 🗡️ 딜러 리스트 🗡️ =`);
+            printList(dealList);
+            console.log('\n=======================\`\`\`\n');
+        }
     }
 }
 
 const test = new ZvzMetaViewer();
 
 test.start(642235067, 'GOSTOP');
+
+test.start(642384729, 'EscaIation');
+
+test.start(642384729, null, 'CHIPS');
+
+test.start(642238636, null, 'PKO');
