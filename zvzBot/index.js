@@ -33,9 +33,24 @@ class ZvzMetaViewer {
         if (Equipment.MainHand != null)
             if (Id in Users) {
                 Users[Id].mainHand = Equipment.MainHand.Type;
+                Users[Id].ally = AllianceName;
+                Users[Id].userId = Id;
             }
 
         return tmpUsers;
+    }
+
+    printParty(party, users) {
+
+        const fullPartyKeys = Object.keys(party);
+        for (var j = 0; j < fullPartyKeys.length; j++) {
+            console.log(`=== party ===`);
+            const members = party[fullPartyKeys[j]];
+            for (const member of members) {
+                // console.log(member);
+                console.log(users[member].name);
+            }
+        }
     }
 
     async processParty(party, groupMembers) {
@@ -43,7 +58,7 @@ class ZvzMetaViewer {
 
         let members = [];
         for (const group of groupMembers) {
-            const { Id } = group;
+            const { Id, GuildName, AllianceName } = group;
             members.push(Id);
         }
 
@@ -63,7 +78,7 @@ class ZvzMetaViewer {
 
     }
 
-    async start(battleId) {
+    async start(battleId, guild = null, ally = null) {
         const id = parseInt(battleId);
 
         const urlKillboard = `https://gameinfo.albiononline.com/api/gameinfo/battles/${id}`;
@@ -117,28 +132,41 @@ class ZvzMetaViewer {
                 }
 
                 // make Party
-                const groupMembersKeys = Object.keys(GroupMembers);
-                if (groupMembersKeys.length == 20) {
-                    // fullParty
-                    fullParty = await this.processParty(fullParty, GroupMembers);
-                } else {
-                    // boomParty
-                    boomParty = await this.processParty(boomParty, GroupMembers);
+
+                const { GuildName, AllianceName } = Killer;
+                if ((guild != null && GuildName == guild) || (ally != null && AllianceName == ally)) {
+                    const groupMembersKeys = Object.keys(GroupMembers);
+                    if (groupMembersKeys.length == 20) {
+                        // fullParty
+                        fullParty = await this.processParty(fullParty, GroupMembers);
+                    } else if (groupMembersKeys.length < 10) {
+                        boomParty = await this.processParty(boomParty, GroupMembers);
+                    }
                 }
+
             }
         }
 
         // console.dir(Users, { depth: 3 });
-        console.log('full party');
-        console.dir(fullParty, { depth: 3 });
+        //console.log('full party');
+        //console.dir(fullParty, { depth: 3 });
 
-        console.log('boom party');
-        console.dir(boomParty, { depth: 3 });
+        //console.log('boom party');
+        //console.dir(boomParty, { depth: 3 });
 
+        console.log(Object.keys(fullParty).length);
+        console.log(Object.keys(boomParty).length);
 
+        console.log(`=== full Party ===`);
+        this.printParty(fullParty, Users);
+        console.log(`=== end ===`);
+
+        console.log(`=== boom party ===`);
+        this.printParty(boomParty, Users);
+        console.log(`=== end ===`);
     }
 }
 
 const test = new ZvzMetaViewer();
 
-test.start(642235067);
+test.start(642235067, 'GOSTOP');
