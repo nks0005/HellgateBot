@@ -145,7 +145,7 @@ class ZvzMetaViewer {
 
             const { name, id, guildName, allianceName } = players[playerKey];
 
-            if ((guild != null && guildName == guild) || (ally != null && allianceName == ally)) {
+            if ((guild != null && guildName.toLowerCase() == guild.toLowerCase()) || (ally != null && allianceName.toLowerCase() == ally.toLowerCase())) {
                 Users[id] = { name: name, guild: guildName, ally: allianceName };
             }
         }
@@ -184,7 +184,7 @@ class ZvzMetaViewer {
                 // make Party
 
                 const { GuildName, AllianceName } = Killer;
-                if ((guild != null && GuildName == guild) || (ally != null && AllianceName == ally)) {
+                if ((guild != null && GuildName.toLowerCase() == guild.toLowerCase()) || (ally != null && AllianceName.toLowerCase() == ally.toLowerCase())) {
                     const groupMembersKeys = Object.keys(GroupMembers);
                     if (groupMembersKeys.length == 20) {
                         // fullParty
@@ -306,10 +306,31 @@ class ZvzMetaViewer {
 
 const test = new ZvzMetaViewer();
 
-test.start(642235067, 'GOSTOP');
 
+const arg1 = process.argv[2];
+const arg2 = process.argv[3];
+const arg3 = process.argv[4];
+
+console.log(arg1, arg2, arg3);
+
+let guild = null;
+if (arg2 == 'null') guild = null;
+else
+    guild = process.argv[3].toLowerCase();
+let ally = null;
+if (arg3 == undefined)
+    ally = null;
+else
+    ally = process.argv[4].toLowerCase();
+
+const intId = process.argv[2];
+
+test.start(intId, guild, ally);
+
+/*
 test.start(642384729, 'EscaIation');
 
 test.start(642384729, null, 'CHIPS');
 
 test.start(642238636, null, 'PKO');
+*/
