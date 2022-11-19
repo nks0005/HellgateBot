@@ -151,8 +151,7 @@ class Crawl {
                 //console.log(checkUser.id);
                 if (mainHand == undefined) {
                     mainHand = 0;
-                    console.log(`battleId : ${battleId}
-                name : ${name}`)
+                    //console.log(`battleId : ${battleId}  name : ${name}`)
                 }
                 if (offHand == undefined) offHand = null;
                 if (head == undefined) head = null;
@@ -245,8 +244,8 @@ class Crawl {
         try {
             res = await axios(url);
         } catch (err) {
-            console.log(`${url}로 부터 데이터를 정상적으로 얻지 못했습니다. 1초 뒤 다시 시도합니다.`);
-            await sleep(1000);
+            console.log(`${url}로 부터 데이터를 정상적으로 얻지 못했습니다. 5초 뒤 다시 시도합니다.`);
+            await sleep(5000);
             return await this.getDataFromUrl(url);
         }
         if (res.status != 200 || res.data == null) {
@@ -630,7 +629,6 @@ class Crawl {
     }
 }
 
-let crawl = new Crawl();
-crawl.start(0, 200);
+
 
 module.exports = Crawl;
