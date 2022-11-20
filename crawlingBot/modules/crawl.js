@@ -68,7 +68,8 @@ class Crawl {
     }
 
 
-    async processDb(battle, team, winFlag, matchType) {
+    async processDb(battle, team, WinFlag, matchType) {
+        const winFlag = WinFlag;
         // console.log(battle);
         //console.dir(team, { depth: 3 });
 
@@ -205,30 +206,8 @@ class Crawl {
                     });
                 }
 
-                // up count
-                if (winFlag) {
-                    if (matchType == 5) {
-                        await User.update({
-                            win55: (checkUser.win55 + 1)
-                        }, { where: { id: checkUser.id } });
-                    } else {
-                        await User.update({
-                            win1010: (checkUser.win1010 + 1)
-                        }, { where: { id: checkUser.id } });
-                    }
-                } else {
-                    if (matchType == 5) {
-                        await User.update({
-                            lose55: (checkUser.lose55 + 1)
-                        }, { where: { id: checkUser.id } });
-                    } else {
-                        await User.update({
-                            lose1010: (checkUser.lose1010 + 1)
-                        }, { where: { id: checkUser.id } });
-                    }
-                }
             }
-
+            console.log(battleId);
         } catch (err) {
             console.error(err);
         } finally {
@@ -319,14 +298,25 @@ class Crawl {
 
         if (Id == undefined)
             return tmpUsers;
+
+        if (tmpUsers[Id] == undefined) {
+            tmpUsers[Id] = {};
+        }
+
+
         if (AverageItemPower != 0 && AverageItemPower != NaN && AverageItemPower != undefined) {
             if (!('avgIp' in tmpUsers[Id]))
                 tmpUsers[Id]['avgIp'] = parseInt(AverageItemPower);
         }
 
         if (SupportHealingDone != 0 && SupportHealingDone != NaN && SupportHealingDone != undefined) {
-            if (!('heal' in tmpUsers[Id]))
-                tmpUsers[Id]['heal'] = parseInt(SupportHealingDone);
+            try {
+                if (!('heal' in tmpUsers[Id]))
+                    tmpUsers[Id]['heal'] = parseInt(SupportHealingDone);
+            } catch (err) {
+                console.log('에러 발생');
+                console.log(tmpUsers[Id]);
+            }
         }
 
         // add Equipments
@@ -497,7 +487,7 @@ class Crawl {
                 checkHealer++;
         }
         //console.dir(Users, { depth: 3 });
-        if (checkHealer < 2) return { victory: null, defeat: null, ret: -1 };
+        if (checkHealer < 1) return { victory: null, defeat: null, ret: -1 };
 
         //console.log(Users);
 
@@ -624,7 +614,7 @@ class Crawl {
     async start(start, end) {
         // 1. api로 부터 데이터를 얻어온다.
         for (var i = start; i < end; i++) { // 최대 0 ~ 10000 = 0 ~ 200
-            this.main(i);
+            await this.main(i);
         }
     }
 }

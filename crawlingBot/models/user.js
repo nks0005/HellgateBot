@@ -12,7 +12,8 @@ module.exports = class User extends Sequelize.Model {
 
             name: {
                 type: Sequelize.STRING(100),
-                allowNull: false
+                allowNull: false,
+                unique: true
             },
 
             guild: {

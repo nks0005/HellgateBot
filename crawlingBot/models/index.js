@@ -14,6 +14,8 @@ const Comps1010 = require('./comps1010');
 const Weapon55 = require('./weapon55');
 const Weapon1010 = require('./weapon1010');
 
+const Discord = require('./discord.js');
+const { seq } = require('async');
 
 const db = {};
 
@@ -32,6 +34,8 @@ db.Comps1010 = Comps1010;
 db.Weapon55 = Weapon55;
 db.Weapon1010 = Weapon1010;
 
+db.Discord = Discord;
+
 BattleLog.init(sequelize);
 WinTeam.init(sequelize);
 LoseTeam.init(sequelize);
@@ -43,6 +47,8 @@ Comps1010.init(sequelize);
 Weapon55.init(sequelize);
 Weapon1010.init(sequelize);
 
+Discord.init(sequelize);
+
 BattleLog.associate(db);
 WinTeam.associate(db);
 LoseTeam.associate(db);
@@ -53,5 +59,7 @@ Comps55.associate(db);
 Comps1010.associate(db);
 Weapon55.associate(db);
 Weapon1010.associate(db);
+
+Discord.associate(db);
 
 module.exports = db;

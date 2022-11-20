@@ -30,7 +30,7 @@ client.once('ready', () => {
             try {
                 // 채널 접속
                 const connection = joinVoiceChannel({
-                    channelId: "1017509122729574511",
+                    channelId: "1041364056923185162",
                     guildId: "748345742158200832",
                     adapterCreator: client.guilds.cache.get("748345742158200832").voiceAdapterCreator
                 });
@@ -40,7 +40,7 @@ client.once('ready', () => {
                 let filteredTime = (date.getHours() < 10 ? '0' + date.getHours() : date.getHours()) + ':' + (date.getMinutes() < 10 ? '0' + date.getMinutes() : date.getMinutes());
                 const strKrTime = `Updated : ${filteredTime} KR`;
 
-                Client.guilds.cache.get("748345742158200832").channels.cache.get("1017509122729574511").setName(strKrTime).then(() => { console.log('업데이트 시간 갱신') }).catch((err) => { console.error(err) });
+                Client.guilds.cache.get("748345742158200832").channels.cache.get("1041364056923185162").setName(strKrTime).then(() => { console.log('업데이트 시간 갱신') }).catch((err) => { console.error(err) });
                 console.log(strKrTime);
 
                 // Match / 1hour 업데이트 채널
@@ -71,9 +71,9 @@ client.once('ready', () => {
                         }
                     } catch (err) { console.error(err); }
                 };
-                processMatch("1018762422879780864", 2);
-                processMatch("1018762614299430922", 5);
-                processMatch("1018762712584556575", 10);
+                //processMatch("1018762422879780864", 2);
+                //processMatch("1018762614299430922", 5);
+                //processMatch("1018762712584556575", 10);
 
                 await Util.sleep(10 * 60 * 1000); // 10분마다
 

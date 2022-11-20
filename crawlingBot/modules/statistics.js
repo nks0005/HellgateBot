@@ -60,6 +60,26 @@ class Statistics {
                 }, { where: { id: checkWeapon55.id } });
             }
 
+            // = User 처리 =
+            // check User.
+            let checkUser = await User.findOne({
+                where: { id: userId }
+            });
+
+
+
+            // up count
+            if (winflag) {
+                await User.update({
+                    win55: (checkUser.win55 + 1)
+                }, { where: { id: checkUser.id } });
+            } else {
+                await User.update({
+                    lose55: (checkUser.lose55 + 1)
+                }, { where: { id: checkUser.id } });
+            }
+
+
             teamGear.push(gear.mainHand);
         }
 

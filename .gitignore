@@ -6,3 +6,6 @@
 /crawlingBot/.env
 /crawlingBot/node_modules
 /zvzBot/node_modules
+/monitorDiscordBot/config
+/monitorDiscordBot/.env
+/monitorDiscordBot/node_modules
