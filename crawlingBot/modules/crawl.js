@@ -207,7 +207,7 @@ class Crawl {
                 }
 
             }
-            console.log(battleId);
+
         } catch (err) {
             console.error(err);
         } finally {
@@ -413,7 +413,7 @@ class Crawl {
 
 
             if (KillArea != 'OPEN_WORLD') return { victory: null, defeat: null, ret: -1 };
-            if (!(groupMemberCount == 5 || groupMemberCount == 10)) checkgroupMember = true;
+            if (groupMemberCount == 5 || groupMemberCount == 10) checkgroupMember = true;
 
             battleId = BattleId;
 
@@ -504,6 +504,7 @@ class Crawl {
         */
 
         // Winner : teamA
+        //console.log(`teamA count : ${teamA.count} | ${Object.keys(teamA).length}, teamB count : ${teamB.count} | ${Object.keys(teamB).length}`);
         if (teamB.count == (Object.keys(teamB).length - 1)) {
             delete teamB.count;
             delete teamA.count;
@@ -532,6 +533,7 @@ class Crawl {
         //console.dir(defeat, { depth: 3 });
 
 
+        //console.log(checkgroupMember);
         if (checkgroupMember == false) {
             return { victory: null, defeat: null, ret: -1 };
         }
@@ -603,6 +605,8 @@ class Crawl {
         // DB에 데이터를 넣어야 한다.
         await this.processDb(battleLog, teamVictory, true, matchType);
         await this.processDb(battleLog, teamDefeat, false, matchType);
+
+        console.log(id);
     }
 
     async main(i) {
