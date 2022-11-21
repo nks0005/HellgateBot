@@ -434,8 +434,9 @@ class Crawl {
                     for (var i = 0; i < keys.length; i++) {
                         var key = keys[i];
 
-                        if (!(key in teamA))
+                        if (!(key in teamA)) {
                             teamB[key] = Users[key].name;
+                        }
                     }
                 }
             }
@@ -459,9 +460,11 @@ class Crawl {
 
                 // avg가 0일 경우 버그성 사망.
                 const { AverageItemPower } = Victim;
-                if (AverageItemPower != 0)
-                    teamB.count = teamB.count + 1;
-
+                if (AverageItemPower != 0) {
+                    if (Victim.Id in teamB)
+                        teamB.count = teamB.count + 1;
+                    else teamA.count = teamA.count + 1;
+                }
                 if (AverageItemPower != 0 && (AverageItemPower < this.minIp || AverageItemPower > this.maxIp))
                     return { victory: null, defeat: null, ret: -1 };
             }
@@ -540,8 +543,6 @@ class Crawl {
     async processKillboard(recentKillboard) {
         const { totalKills, totalFame, id, startTime, players } = recentKillboard;
 
-
-        console.log(`find! ${id}`);
         const totalPlayers = array2count(players);
 
         /*
@@ -626,5 +627,6 @@ class Crawl {
         }
     }
 }
+
 
 module.exports = Crawl;
