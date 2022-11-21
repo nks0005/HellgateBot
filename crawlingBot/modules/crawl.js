@@ -223,12 +223,12 @@ class Crawl {
         try {
             res = await axios(url);
         } catch (err) {
-            console.log(`${url}로 부터 데이터를 정상적으로 얻지 못했습니다. 5초 뒤 다시 시도합니다.`);
+            //console.log(`${url}로 부터 데이터를 정상적으로 얻지 못했습니다. 5초 뒤 다시 시도합니다.`);
             await sleep(5000);
             return await this.getDataFromUrl(url);
         }
         if (res.status != 200 || res.data == null) {
-            console.log(`${url}로 부터 데이터를 정상적으로 얻지 못했습니다. 10초 뒤 다시 시도합니다.`);
+            //console.log(`${url}로 부터 데이터를 정상적으로 얻지 못했습니다. 10초 뒤 다시 시도합니다.`);
 
             await sleep(10000);
             return await this.getDataFromUrl(url);
@@ -404,14 +404,16 @@ class Crawl {
 
         let battleId = 0;
 
+        let checkgroupMember = false;
 
         // KillArea : 'OPEN_WORLD'
         // groupMemberCount : 4
         for (const event of events) {
             const { groupMemberCount, KillArea, BattleId, Killer, Victim, Participants, GroupMembers } = event;
 
+
             if (KillArea != 'OPEN_WORLD') return { victory: null, defeat: null, ret: -1 };
-            if (!(groupMemberCount == 5 || groupMemberCount == 10)) return { victory: null, defeat: null, ret: -1 };
+            if (!(groupMemberCount == 5 || groupMemberCount == 10)) checkgroupMember = true;
 
             battleId = BattleId;
 
@@ -527,6 +529,9 @@ class Crawl {
         //console.dir(defeat, { depth: 3 });
 
 
+        if (checkgroupMember == false) {
+            return { victory: null, defeat: null, ret: -1 };
+        }
         return { victory: victory, defeat: defeat, ret: 0 };
     }
 
@@ -534,6 +539,9 @@ class Crawl {
 
     async processKillboard(recentKillboard) {
         const { totalKills, totalFame, id, startTime, players } = recentKillboard;
+
+
+        console.log(`find! ${id}`);
         const totalPlayers = array2count(players);
 
         /*
@@ -618,7 +626,5 @@ class Crawl {
         }
     }
 }
-
-
 
 module.exports = Crawl;
