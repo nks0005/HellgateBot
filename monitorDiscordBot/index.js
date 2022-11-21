@@ -11,7 +11,7 @@ const discordVoice = require('./modules/voice.js');
 client.once('ready', () => {
     console.log('Ready!');
 
-    const monitor = new Monitor(5000);
+    const monitor = new Monitor(30000);
     monitor.start55(
         client.guilds.cache.get("748345742158200832").channels.cache.get("1031183028732571648"),
         client.guilds.cache.get("748345742158200832").channels.cache.get("1031183277006000138")

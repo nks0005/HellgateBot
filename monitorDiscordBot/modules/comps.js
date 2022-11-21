@@ -26,7 +26,8 @@ class Comp {
         const Comps = await Comp55.findAll({
             order: [
                 ['victory', 'DESC']
-            ]
+            ],
+            limit: 20
         });
 
         let msg = `\`\`\`md\n`;

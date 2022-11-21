@@ -13,7 +13,7 @@ const start = async() => {
         }, 30000);
     })
 
-    //await crawl.start(0, 200);
+    await crawl.start(0, 200);
 
     while (true) {
 

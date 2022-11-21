@@ -64,7 +64,11 @@ class Monitor {
             let hellgateEmbed = new EmbedBuilder();
 
             let date = new Date(startTime);
-            hellgateEmbed.setColor('#2fff00')
+
+            const color = date.getTime() % 0xffffff;
+            console.log(color.toString(16));
+
+            hellgateEmbed.setColor(`${color.toString(16)}`)
                 .setTitle(`https://albionbattles.com/battles/${battleId}`)
                 .setURL(`https://albionbattles.com/battles/${battleId}`)
                 .setAuthor({ name: `Find 5v5 hellgate  [ UTC Time :  ${date.toISOString().replace(/T/, ' ').replace(/\..+/, '')} ]`, url: `https://albionbattles.com/battles/${battleId}` })

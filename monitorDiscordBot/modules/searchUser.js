@@ -88,7 +88,11 @@ class searchUser {
 
         let hellgateEmbed = new EmbedBuilder();
 
-        hellgateEmbed.setColor('#2fff00')
+        let date = new Date();
+        const color = date.getTime() % 0xffffff;
+        console.log(color.toString(16));
+
+        hellgateEmbed.setColor(`${color.toString(16)}`)
             .setTitle(`${name} 전적표`)
             .setFooter({ text: '©hellgate bot' });
 
