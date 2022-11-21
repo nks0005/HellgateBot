@@ -108,7 +108,7 @@ class Monitor {
         // 디스코드 기록들을 얻어온다
         const discordLogs = await Discord.findAll({
             order: [
-                ['battleId', 'ASC']
+                ['battleId', 'DESC']
             ],
         });
 

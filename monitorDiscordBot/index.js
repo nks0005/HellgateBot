@@ -12,10 +12,13 @@ client.once('ready', () => {
     console.log('Ready!');
 
     const monitor = new Monitor(30000);
+
+
     monitor.start55(
         client.guilds.cache.get("748345742158200832").channels.cache.get("1044201141673660487"),
         client.guilds.cache.get("748345742158200832").channels.cache.get("1044201160099242044")
     );
+
 
     const voice = new discordVoice();
     voice.start(client);

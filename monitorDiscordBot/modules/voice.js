@@ -1,4 +1,7 @@
 const { joinVoiceChannel } = require('@discordjs/voice');
+const { BattleLog } = require('../models');
+const { Op } = require('sequelize');
+
 class Voice {
     constructor() {
 
@@ -30,25 +33,26 @@ class Voice {
                 // Match / 1hour 업데이트 채널
 
 
-                /*
+
                 const processMatch = async(channelId, type) => {
                     try {
-                        let matchType = Util.getURL().DOUBLE;
+                        const tmpDate = new Date();
+                        const nowDate = new Date();
+                        const startDate = tmpDate.setHours(tmpDate.getHours() - 1);
 
-                        if (type == 2) {
-                            matchType = Util.getURL().DOUBLE;
-                        } else if (type == 5) {
-                            matchType = Util.getURL().FIVE;
-                        } else if (type == 10) {
-                            matchType = Util.getURL().TEN;
-                        }
 
-                        const url = Util.getURL().HOME + Util.getURL().HELLGATE + Util.getURL().COUNT + matchType;
-                        let ret = await axios.get(url);
-                        if (ret.status == 201) {
-                            console.log(`${url} : ${ret.data}`);
+                        let count = await BattleLog.count({
+                            where: {
+                                matchType: type,
+                                "startTime": {
+                                    [Op.between]: [startDate, nowDate]
+                                },
+                            }
+                        });
+                        console.log(count);
 
-                            const msg = `[${type}:${type}] ${ret.data}판 `;
+                        if (count > 0) {
+                            const msg = `[${type}:${type}] ${count}판 `;
 
                             Client.guilds.cache.get("748345742158200832").channels.cache.get(`${channelId}`).setName(msg).then(() => { console.log(`${type}:${type} 매치 갱신`) }).catch((err) => { console.error(err) });
                         } else {
@@ -58,9 +62,9 @@ class Voice {
                     } catch (err) { console.error(err); }
                 };
                 //processMatch("1018762422879780864", 2);
-                //processMatch("1018762614299430922", 5);
+                await processMatch("1043838002566271066", 5);
                 //processMatch("1018762712584556575", 10);
-*/
+
                 await this.sleep(10 * 60 * 1000); // 10분마다
 
                 connection.destroy();

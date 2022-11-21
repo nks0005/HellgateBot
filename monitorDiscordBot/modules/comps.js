@@ -1,4 +1,3 @@
-const { find } = require('async');
 const { User, WinTeam, Gear, LoseTeam, Comp55 } = require('../models');
 const jsonItems = require('./items.json');
 
