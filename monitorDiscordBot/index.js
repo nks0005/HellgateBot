@@ -4,7 +4,8 @@ const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
 const User = require('./modules/searchUser.js');
 const Monitor = require('./modules/monitor.js');
-const Comps = require('./modules/comps');
+const Comps = require('./modules/comps.js');
+const Weapons = require('./modules/weapons.js');
 
 const discordVoice = require('./modules/voice.js');
 
@@ -40,10 +41,25 @@ client.on('interactionCreate', async interaction => {
             const user = new User(interaction);
             await user.start(name);
         }
-    } else if (commandName == 'comp') {
+    } else if (commandName == 'comp55') {
         await interaction.reply('처리 중입니다..'); {
             const comp = new Comps(interaction);
-            await comp.start();
+            await comp.start55();
+        }
+    } else if (commandName == 'comp1010') {
+        await interaction.reply('처리 중입니다..'); {
+            const comp = new Comps(interaction);
+            await comp.start1010();
+        }
+    } else if (commandName == 'weapon55') {
+        await interaction.reply('처리 중입니다..'); {
+            const weapons = new Weapons(interaction);
+            await weapons.start55();
+        }
+    } else if (commandName == 'weapon1010') {
+        await interaction.reply('처리 중입니다..'); {
+            const weapons = new Weapons(interaction);
+            await weapons.start1010();
         }
     }
 });

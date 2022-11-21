@@ -1,5 +1,5 @@
 const { joinVoiceChannel } = require('@discordjs/voice');
-const { BattleLog } = require('../models');
+const { BattleLog, User } = require('../models');
 const { Op } = require('sequelize');
 
 class Voice {
@@ -38,7 +38,7 @@ class Voice {
                     try {
                         const tmpDate = new Date();
                         const nowDate = new Date();
-                        const startDate = tmpDate.setHours(tmpDate.getHours() - 1);
+                        const startDate = new Date(tmpDate.setHours(tmpDate.getHours() - 24));
 
 
                         let count = await BattleLog.count({
@@ -62,8 +62,68 @@ class Voice {
                     } catch (err) { console.error(err); }
                 };
                 //processMatch("1018762422879780864", 2);
-                await processMatch("1043838002566271066", 5);
+                await processMatch("1044229657005928508", 5);
+                await processMatch("1044265166382043166", 10);
                 //processMatch("1018762712584556575", 10);
+
+                const checkUser = async(channelId) => {
+
+                    let count = await User.count();
+                    console.log(`total User : ${count}`);
+
+                    if (count > 0) {
+                        const msg = `[총 유저] ${count}`;
+
+                        Client.guilds.cache.get("748345742158200832").channels.cache.get(`${channelId}`).setName(msg).then(() => { console.log(`매치 갱신`) }).catch((err) => { console.error(err) });
+                    }
+                }
+
+                await checkUser("1044229970576293919");
+
+                const runUser = async(channelId) => {
+                    const tmpDate = new Date();
+                    const nowDate = new Date();
+                    const startDate = new Date(tmpDate.setHours(tmpDate.getHours() - 24));
+
+
+                    let count = await User.count({
+                        where: {
+                            "updatedAt": {
+                                [Op.between]: [startDate, nowDate]
+                            },
+                        }
+                    });
+
+                    if (count > 0) {
+                        const msg = `[24시간 유저] ${count} `;
+
+                        Client.guilds.cache.get("748345742158200832").channels.cache.get(`${channelId}`).setName(msg).then(() => { console.log(`24시간 플레이 유저 매치 갱신`) }).catch((err) => { console.error(err) });
+                    }
+                }
+                await runUser("1044231260383486073");
+
+                const newUser = async(channelId) => {
+                    const tmpDate = new Date();
+                    const nowDate = new Date();
+                    const startDate = new Date(tmpDate.setHours(tmpDate.getHours() - 24));
+
+
+                    let count = await User.count({
+                        where: {
+                            "createdAt": {
+                                [Op.between]: [startDate, nowDate]
+                            },
+                        }
+                    });
+
+                    if (count > 0) {
+                        const msg = `[신규유저] ${count} `;
+
+                        Client.guilds.cache.get("748345742158200832").channels.cache.get(`${channelId}`).setName(msg).then(() => { console.log(`신규 유입 유저 갱신`) }).catch((err) => { console.error(err) });
+                    }
+                }
+                await newUser("1044229853806874624");
+
 
                 await this.sleep(10 * 60 * 1000); // 10분마다
 

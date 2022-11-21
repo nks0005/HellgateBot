@@ -1,7 +1,7 @@
 const { User, WinTeam, Gear, LoseTeam } = require('../models');
 const jsonItems = require('./items.json');
 
-const { EmbedBuilder, Embed } = require("discord.js");
+const { EmbedBuilder } = require("discord.js");
 
 const findIndex2Kr = (index) => {
 

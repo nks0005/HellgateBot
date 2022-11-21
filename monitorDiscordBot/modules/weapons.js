@@ -1,4 +1,4 @@
-const { Comp55, Comps1010 } = require('../models');
+const { User, WinTeam, Gear, LoseTeam, Weapon55 } = require('../models');
 const jsonItems = require('./items.json');
 
 const { EmbedBuilder } = require("discord.js");
@@ -16,7 +16,7 @@ const findIndex2Kr = (index) => {
     }
 }
 
-class Comp {
+class Weapon {
     constructor(Interaction) {
         this.interaction = Interaction;
     }
@@ -24,7 +24,7 @@ class Comp {
 
     async start55() {
         // 정보 리스트를 얻어온다
-        const Comps = await Comp55.findAll({
+        const Weapons = await Weapon55.findAll({
             order: [
                 ['victory', 'DESC']
             ],
@@ -38,14 +38,14 @@ class Comp {
         console.log(color.toString(16));
 
         hellgateEmbed.setColor(`${color.toString(16)}`)
-            .setTitle(`조합 통계`)
+            .setTitle(`무기 통계`)
             .setFooter({ text: '©hellgate bot' });
 
 
-        for (const comp of Comps) {
-            const { w1, w2, w3, w4, w5, victory, defeat } = comp;
+        for (const weapon of Weapons) {
+            const { mainHand, victory, defeat } = weapon;
 
-            hellgateEmbed.addFields({ name: `승: ${victory} | 패: ${defeat}`, value: `${findIndex2Kr(w1)} ${findIndex2Kr(w2)} ${findIndex2Kr(w3)} ${findIndex2Kr(w4)} ${findIndex2Kr(w5)}` });
+            hellgateEmbed.addFields({ name: `승: ${victory} | 패: ${defeat}`, value: `${findIndex2Kr(mainHand)}` });
         }
 
         await this.interaction.editReply({ embeds: [hellgateEmbed] });
@@ -53,7 +53,7 @@ class Comp {
 
     async start1010() {
         // 정보 리스트를 얻어온다
-        const Comps = await Comps1010.findAll({
+        const Weapons = await Weapon1010.findAll({
             order: [
                 ['victory', 'DESC']
             ],
@@ -67,14 +67,14 @@ class Comp {
         console.log(color.toString(16));
 
         hellgateEmbed.setColor(`${color.toString(16)}`)
-            .setTitle(`조합 통계`)
+            .setTitle(`무기 통계`)
             .setFooter({ text: '©hellgate bot' });
 
 
-        for (const comp of Comps) {
-            const { w1, w2, w3, w4, w5, w6, w7, w8, w9, w10, victory, defeat } = comp;
+        for (const weapon of Weapons) {
+            const { mainHand, victory, defeat } = weapon;
 
-            hellgateEmbed.addFields({ name: `승: ${victory} | 패: ${defeat}`, value: `${findIndex2Kr(w1)} ${findIndex2Kr(w2)} ${findIndex2Kr(w3)} ${findIndex2Kr(w4)} ${findIndex2Kr(w5)} ${findIndex2Kr(w6)} ${findIndex2Kr(w7)} ${findIndex2Kr(w8)} ${findIndex2Kr(w9)} ${findIndex2Kr(w10)}` });
+            hellgateEmbed.addFields({ name: `승: ${victory} | 패: ${defeat}`, value: `${findIndex2Kr(mainHand)}` });
         }
 
         await this.interaction.editReply({ embeds: [hellgateEmbed] });
@@ -83,4 +83,4 @@ class Comp {
 }
 
 
-module.exports = Comp;
+module.exports = Weapon;

@@ -16,8 +16,9 @@ const start = async() => {
     await crawl.start(0, 200);
 
     while (true) {
-
+        console.log('start');
         await crawl.start(0, 50);
+        console.log('end');
         await sleep();
         stat.start();
         await sleep();
