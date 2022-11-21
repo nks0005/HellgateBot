@@ -106,7 +106,11 @@ class Monitor {
         });
 
         // 디스코드 기록들을 얻어온다
-        const discordLogs = await Discord.findAll();
+        const discordLogs = await Discord.findAll({
+            order: [
+                ['battleId', 'ASC']
+            ],
+        });
 
         for (const battleLog of battleLogs) {
             const logCheck = this.compareLogs(battleLog, discordLogs);
