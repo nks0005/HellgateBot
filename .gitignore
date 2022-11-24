@@ -9,3 +9,6 @@
 /monitorDiscordBot/config
 /monitorDiscordBot/.env
 /monitorDiscordBot/node_modules
+/apiServer/config
+/apiServer/node_modules
+/apiServer/.env

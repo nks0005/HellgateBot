@@ -1,4 +1,4 @@
-const { User, WinTeam, Gear, LoseTeam, Weapon55 } = require('../models');
+const { User, WinTeam, Gear, LoseTeam, Weapon55, Weapon1010 } = require('../models');
 const jsonItems = require('./items.json');
 
 const { EmbedBuilder } = require("discord.js");
@@ -38,14 +38,14 @@ class Weapon {
         console.log(color.toString(16));
 
         hellgateEmbed.setColor(`${color.toString(16)}`)
-            .setTitle(`무기 통계`)
+            .setTitle(`5v5  무기 통계`)
             .setFooter({ text: '©hellgate bot' });
 
 
         for (const weapon of Weapons) {
             const { mainHand, victory, defeat } = weapon;
 
-            hellgateEmbed.addFields({ name: `승: ${victory} | 패: ${defeat}`, value: `${findIndex2Kr(mainHand)}` });
+            hellgateEmbed.addFields({ name: `승: ${victory} | 패: ${defeat}`, value: `${findIndex2Kr(mainHand)}`, inline: true });
         }
 
         await this.interaction.editReply({ embeds: [hellgateEmbed] });
@@ -67,14 +67,14 @@ class Weapon {
         console.log(color.toString(16));
 
         hellgateEmbed.setColor(`${color.toString(16)}`)
-            .setTitle(`무기 통계`)
+            .setTitle(`10v10 무기 통계`)
             .setFooter({ text: '©hellgate bot' });
 
 
         for (const weapon of Weapons) {
             const { mainHand, victory, defeat } = weapon;
 
-            hellgateEmbed.addFields({ name: `승: ${victory} | 패: ${defeat}`, value: `${findIndex2Kr(mainHand)}` });
+            hellgateEmbed.addFields({ name: `승: ${victory} | 패: ${defeat}`, value: `${findIndex2Kr(mainHand)}`, inline: true });
         }
 
         await this.interaction.editReply({ embeds: [hellgateEmbed] });

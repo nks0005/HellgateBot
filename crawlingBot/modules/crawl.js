@@ -31,6 +31,7 @@ const findItemIndex = (itemName) => {
         if (tmpItemName == item['UniqueName']) {
             let ret = item['Index'];
 
+            if (ret == NaN) return 'undefined'
             return ret;
         }
     }
@@ -43,6 +44,8 @@ const Type2Index = (Type) => {
 
     const item = filterItem(`${Type}`);
     const index = parseInt(findItemIndex(`${item}`));
+
+    if (index == NaN) return null;
 
     return index;
 }

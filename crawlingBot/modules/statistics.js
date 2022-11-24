@@ -178,11 +178,11 @@ class Statistics {
             // up count
             if (winflag) {
                 await User.update({
-                    win55: (checkUser.win1010 + 1)
+                    win1010: (checkUser.win1010 + 1)
                 }, { where: { id: checkUser.id } });
             } else {
                 await User.update({
-                    lose55: (checkUser.lose1010 + 1)
+                    lose1010: (checkUser.lose1010 + 1)
                 }, { where: { id: checkUser.id } });
             }
 

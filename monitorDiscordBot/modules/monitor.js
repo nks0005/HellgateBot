@@ -26,13 +26,13 @@ class Monitor {
         return new Promise(resolve => { setTimeout(resolve, ms) });
     }
 
-    async processTeam(members) {
+    async processTeam(members, type) {
         let msg = ``;
         for (const member of members) {
             const { ip, userId, equipId } = member;
 
             const user = await User.findOne({ where: { id: userId } });
-            const { name, guild, ally } = user;
+            const { name, guild, ally, win55, lose55, win1010, lose1010 } = user;
 
             const gear = await Gear.findOne({ where: { id: equipId } });
             let { mainHand, offHand, head, armor, shoes, cape } = gear;
@@ -44,19 +44,23 @@ class Monitor {
             shoes = `${ findIndex2Kr(shoes)}`.replace(' ', '');
             cape = `${findIndex2Kr(cape)}`.replace(' ', '');
 
-            msg += `[${mainHand}] ${name} (${ip})\n${(offHand=='undefined'?'':offHand+' ')}${head=='undefined'?'':head} ${armor=='undefined'?'':armor} ${shoes=='undefined'?'':shoes} ${cape=='undefined'?'':cape}\n\n`;
+            if (type == 5) {
+                msg += `[${mainHand}] ${name} (${ip}) [승:${win55}|패:${lose55}]\n${(offHand=='undefined'?'':offHand+' ')}${head=='undefined'?'':head} ${armor=='undefined'?'':armor} ${shoes=='undefined'?'':shoes} ${cape=='undefined'?'':cape}\n\n`;
+            } else if (type == 10) {
+                msg += `[${mainHand}] ${name} (${ip}) [승:${win1010}|패:${lose1010}]\n${(offHand=='undefined'?'':offHand+' ')}${head=='undefined'?'':head} ${armor=='undefined'?'':armor} ${shoes=='undefined'?'':shoes} ${cape=='undefined'?'':cape}\n\n`;
+            }
         }
 
         return msg;
     }
 
-    async processPrintChannel(battleLog, channel) {
+    async processPrintChannel(battleLog, channel, type) {
         const { battleId, startTime, totalFame } = battleLog;
         try {
 
             // battleLog의 승리자, 패배자 정보들을 얻어온다
 
-            const victoryMembers = await WinTeam.findAll({ where: { battleId: battleId } });
+            const victoryMembers = await WinTeam.findAll({ where: { battleId: battleId, chekc } });
             const defeatMembers = await LoseTeam.findAll({ where: { battleId: battleId } });
 
 
@@ -76,9 +80,9 @@ class Monitor {
                 .setFooter({ text: '한국 시간 : ' });
 
 
-            hellgateEmbed.addFields({ name: `🗡️Victory Team`, value: await this.processTeam(victoryMembers) });
+            hellgateEmbed.addFields({ name: `🗡️Victory Team`, value: await this.processTeam(victoryMembers, type) });
 
-            hellgateEmbed.addFields({ name: `☠️Defeat Team`, value: await this.processTeam(defeatMembers) });
+            hellgateEmbed.addFields({ name: `☠️Defeat Team`, value: await this.processTeam(defeatMembers, type) });
 
             await channel.send({ embeds: [hellgateEmbed] });
 
@@ -101,7 +105,8 @@ class Monitor {
         // BattleLogs 기록들을 얻어온다
         const battleLogs = await BattleLog.findAll({
             where: {
-                matchType: matchType
+                matchType: matchType,
+                check: true
             }
         });
 
@@ -119,7 +124,7 @@ class Monitor {
                 continue;
 
             // 모니터링 출력 진행
-            const ret = await this.processPrintChannel(battleLog, channel);
+            const ret = await this.processPrintChannel(battleLog, channel, matchType);
 
             if (ret == true)
                 await Discord.create({ battleId: battleLog.battleId });

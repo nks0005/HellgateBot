@@ -38,14 +38,14 @@ class Comp {
         console.log(color.toString(16));
 
         hellgateEmbed.setColor(`${color.toString(16)}`)
-            .setTitle(`조합 통계`)
+            .setTitle(`5v5 조합 통계`)
             .setFooter({ text: '©hellgate bot' });
 
 
         for (const comp of Comps) {
             const { w1, w2, w3, w4, w5, victory, defeat } = comp;
 
-            hellgateEmbed.addFields({ name: `승: ${victory} | 패: ${defeat}`, value: `${findIndex2Kr(w1)} ${findIndex2Kr(w2)} ${findIndex2Kr(w3)} ${findIndex2Kr(w4)} ${findIndex2Kr(w5)}` });
+            hellgateEmbed.addFields({ name: `승: ${victory} | 패: ${defeat}`, value: `${findIndex2Kr(w1)} ${findIndex2Kr(w2)} ${findIndex2Kr(w3)} ${findIndex2Kr(w4)} ${findIndex2Kr(w5)}`, inline: true });
         }
 
         await this.interaction.editReply({ embeds: [hellgateEmbed] });
@@ -67,14 +67,14 @@ class Comp {
         console.log(color.toString(16));
 
         hellgateEmbed.setColor(`${color.toString(16)}`)
-            .setTitle(`조합 통계`)
+            .setTitle(`10v10 조합 통계`)
             .setFooter({ text: '©hellgate bot' });
 
 
         for (const comp of Comps) {
             const { w1, w2, w3, w4, w5, w6, w7, w8, w9, w10, victory, defeat } = comp;
 
-            hellgateEmbed.addFields({ name: `승: ${victory} | 패: ${defeat}`, value: `${findIndex2Kr(w1)} ${findIndex2Kr(w2)} ${findIndex2Kr(w3)} ${findIndex2Kr(w4)} ${findIndex2Kr(w5)} ${findIndex2Kr(w6)} ${findIndex2Kr(w7)} ${findIndex2Kr(w8)} ${findIndex2Kr(w9)} ${findIndex2Kr(w10)}` });
+            hellgateEmbed.addFields({ name: `승: ${victory} | 패: ${defeat}`, value: `${findIndex2Kr(w1)} ${findIndex2Kr(w2)} ${findIndex2Kr(w3)} ${findIndex2Kr(w4)} ${findIndex2Kr(w5)} ${findIndex2Kr(w6)} ${findIndex2Kr(w7)} ${findIndex2Kr(w8)} ${findIndex2Kr(w9)} ${findIndex2Kr(w10)}`, inline: true });
         }
 
         await this.interaction.editReply({ embeds: [hellgateEmbed] });
