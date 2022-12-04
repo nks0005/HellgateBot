@@ -12,3 +12,5 @@
 /apiServer/config
 /apiServer/node_modules
 /apiServer/.env
+/zvzBot/.env
+/webServer/node_modules

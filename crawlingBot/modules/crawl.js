@@ -31,7 +31,8 @@ const findItemIndex = (itemName) => {
         if (tmpItemName == item['UniqueName']) {
             let ret = item['Index'];
 
-            if (ret == NaN) return 'undefined'
+
+            if (isNaN(ret)) return 'undefined'
             return ret;
         }
     }
@@ -45,7 +46,7 @@ const Type2Index = (Type) => {
     const item = filterItem(`${Type}`);
     const index = parseInt(findItemIndex(`${item}`));
 
-    if (index == NaN) return null;
+    if (isNaN(index)) return null;
 
     return index;
 }
@@ -307,12 +308,12 @@ class Crawl {
         }
 
 
-        if (AverageItemPower != 0 && AverageItemPower != NaN && AverageItemPower != undefined) {
+        if (AverageItemPower != 0 && !isNaN(AverageItemPower) && AverageItemPower != undefined) {
             if (!('avgIp' in tmpUsers[Id]))
                 tmpUsers[Id]['avgIp'] = parseInt(AverageItemPower);
         }
 
-        if (SupportHealingDone != 0 && SupportHealingDone != NaN && SupportHealingDone != undefined) {
+        if (SupportHealingDone != 0 && !isNaN(SupportHealingDone) && SupportHealingDone != undefined) {
             try {
                 if (!('heal' in tmpUsers[Id]))
                     tmpUsers[Id]['heal'] = parseInt(SupportHealingDone);
@@ -327,27 +328,28 @@ class Crawl {
         const { MainHand, OffHand, Head, Armor, Shoes, Cape } = Equipment;
 
         if (MainHand != null) {
-            tmpUsers[Id]['mainHand'] = Type2Index(MainHand);
+            tmpUsers[Id]['mainHand'] = isNaN(Type2Index(MainHand)) ? null : Type2Index(MainHand);
+
         }
 
         if (OffHand != null) {
-            tmpUsers[Id]['offHand'] = Type2Index(OffHand);
+            tmpUsers[Id]['offHand'] = isNaN(Type2Index(OffHand)) ? null : Type2Index(OffHand);
         }
 
         if (Head != null) {
-            tmpUsers[Id]['head'] = Type2Index(Head);
+            tmpUsers[Id]['head'] = isNaN(Type2Index(Head)) ? null : Type2Index(Head);
         }
 
         if (Armor != null) {
-            tmpUsers[Id]['armor'] = Type2Index(Armor);
+            tmpUsers[Id]['armor'] = isNaN(Type2Index(Armor)) ? null : Type2Index(Armor);
         }
 
         if (Shoes != null) {
-            tmpUsers[Id]['shoes'] = Type2Index(Shoes);
+            tmpUsers[Id]['shoes'] = isNaN(Type2Index(Shoes)) ? null : Type2Index(Shoes);
         }
 
         if (Cape != null) {
-            tmpUsers[Id]['cape'] = Type2Index(Cape);
+            tmpUsers[Id]['cape'] = isNaN(Type2Index(Cape)) ? null : Type2Index(Cape);
         }
 
         return tmpUsers;
@@ -422,7 +424,7 @@ class Crawl {
 
             // Init. teamA
             //console.log(Object.keys(teamA).length);
-            if (Object.keys(teamA).length === 1) {
+            if (Object.keys(teamA).length == 1) {
                 // insert Group Members.
                 for (const groupMember of GroupMembers) {
                     const { Id, Name } = groupMember;

@@ -51,6 +51,8 @@ class Monitor {
             }
         }
 
+        if (msg == '') msg = '알수없음';
+
         return msg;
     }
 
@@ -60,7 +62,7 @@ class Monitor {
 
             // battleLog의 승리자, 패배자 정보들을 얻어온다
 
-            const victoryMembers = await WinTeam.findAll({ where: { battleId: battleId, chekc } });
+            const victoryMembers = await WinTeam.findAll({ where: { battleId: battleId } });
             const defeatMembers = await LoseTeam.findAll({ where: { battleId: battleId } });
 
 
