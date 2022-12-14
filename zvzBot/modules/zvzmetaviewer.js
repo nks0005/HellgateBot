@@ -80,6 +80,9 @@ class ZvzMetaViewer {
 
         if (Equipment.MainHand != null)
             if (Id in Users) {
+                if (Equipment.Mount) {
+                    Users[Id].mount = Type2Index(Equipment.Mount);
+                }
                 Users[Id].mainHand = Type2Index(Equipment.MainHand);
                 Users[Id].ally = AllianceName;
                 Users[Id].userId = Id;
@@ -218,8 +221,10 @@ class ZvzMetaViewer {
         */
 
         // console.dir(Users, { depth: 3 });
+        const bmDomain = [2294, 2295, 2296, 2303, 2304, 2305, 2306, 2307, 2308, 2300, 2301, 2302, 2297, 2298, 2299, 2293, 2292, 2291, 2287, 2286, 2285, 2284, 2283, 2282, 2246];
 
         let Weapons = {};
+        let Mounts = {};
 
         {
             const usersKeys = Object.keys(Users);
@@ -227,6 +232,21 @@ class ZvzMetaViewer {
                 const usersKey = usersKeys[i];
 
                 const tmpUser = Users[usersKey];
+
+                if (tmpUser.mount != null || tmpUser.mount != undefined) {
+
+                    if (bmDomain.includes(tmpUser.mount)) {
+
+                        if (!(tmpUser.mount in Mounts)) {
+                            Mounts[tmpUser.mount] = { count: 0 };
+                        }
+
+                        Mounts[tmpUser.mount].count = Mounts[tmpUser.mount].count + 1;
+                        continue;
+                    }
+
+                }
+
                 if (!(tmpUser.mainHand in Weapons)) {
                     Weapons[tmpUser.mainHand] = { count: 0 };
                 }
@@ -234,6 +254,8 @@ class ZvzMetaViewer {
                 Weapons[tmpUser.mainHand].count = Weapons[tmpUser.mainHand].count + 1;
             }
         }
+
+
 
 
         const tankDomain = [6789, 6487, 6689, 6668, 5458];
@@ -260,7 +282,9 @@ class ZvzMetaViewer {
                 const weaponCount = Weapons[weaponsKey].count;
                 const intWeaponKey = parseInt(weaponsKey);
 
-                if (tankDomain.includes(intWeaponKey)) {
+                if (bmDomain.includes()) {
+
+                } else if (tankDomain.includes(intWeaponKey)) {
                     // tank
                     if (!(weaponsKey in tankList)) {
                         tankList[weaponsKey] = { count: weaponCount };
@@ -298,6 +322,9 @@ class ZvzMetaViewer {
                 return msg;
             }
 
+            msg += `= 🦙 배틀마운트 리스트 🦙 =\n`;
+            msg += `추적이 어렵기에 마운트의 경우 잘 안뜹니다.\n`;
+            msg += printList(Mounts);
             msg += `= 🛡️ 클랩 탱커 리스트 🛡️ =\n`;
             msg += printList(tankList);
             msg += `= 🌈 서포터 리스트 🌈 =\n`;
